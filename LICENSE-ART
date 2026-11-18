@@ -1,0 +1,31 @@
+Meow Blossom Haven — Artwork and Character License
+
+Copyright (c) 2026 SummerPapaya
+
+The following are licensed under the Creative Commons
+Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0):
+
+  1. The character "Peach" (猪猪): her name, appearance and likeness, in any
+     medium, including as rendered by this project's code.
+  2. The visual designs of the scenes, islands, furniture and creatures as
+     they appear when the project is run (screenshots, recordings, renders).
+  3. The image files in the assets/ directory, including assets/banner.svg.
+
+You may share and adapt these for non-commercial purposes, provided you give
+appropriate credit ("Meow Blossom Haven by SummerPapaya"), link to the license,
+and indicate if changes were made. Commercial use — for example merchandise,
+paid products, or advertising featuring Peach or these designs — requires
+prior written permission from the copyright holder.
+
+Human-readable summary: https://creativecommons.org/licenses/by-nc/4.0/
+Full legal code:        https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+The source code that generates these visuals is licensed separately under the
+MIT License (see LICENSE). That license lets you use, modify and distribute the
+code; it does not grant rights to use the character or designs listed above
+commercially.
+
+Third-party components keep their own licenses:
+  - three.js — MIT License
+  - Cormorant Garamond font — SIL Open Font License 1.1 (loaded from Google
+    Fonts, not distributed with this project)
