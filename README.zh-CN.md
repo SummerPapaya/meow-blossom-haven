@@ -6,6 +6,10 @@
   <a href="README.md">English</a> · <b>简体中文</b>
 </p>
 
+<p align="center">
+  <a href="https://summerpapaya.github.io/meow-blossom-haven/"><b>▶ 在线体验</b></a>
+</p>
+
 # Meow Blossom Haven · 猪猪的喵喵仙境
 
 为布偶猫**猪猪（Peach）**打造的梦幻 3D 互动小屋：五座漂浮仙岛，每座都有专属的猫爬架、猫窝、隧道和玩具，笼罩在柔和的童话氛围里。整个项目用 [three.js](https://threejs.org) 在一个 HTML 文件里程序化生成，不需要下载任何模型、图片或音频文件。
@@ -32,7 +36,7 @@
 python3 -m http.server 8791 --bind 127.0.0.1
 ```
 
-然后打开 <http://localhost:8791/peach-cottage.html>。也可以部署到任何静态托管（GitHub Pages、Netlify 等）。
+然后打开 <http://localhost:8791/>。也可以部署到任何静态托管（GitHub Pages、Netlify 等）。
 
 首次打开需要联网，用于加载 three.js（jsDelivr）和标题字体（Google Fonts）。
 
@@ -64,7 +68,7 @@ python3 -m http.server 8791 --bind 127.0.0.1
 
 ## 开发
 
-- 所有代码都在 `peach-cottage.html` 里，按注释分区（渲染器、毛发着色器、各浮空岛、猪猪、行为、音频、界面）。
+- 所有代码都在 `index.html` 里，按注释分区（渲染器、毛发着色器、各浮空岛、猪猪、行为、音频、界面）。
 - `?auto` 跳过开场界面；`?debug` 暴露 `window.peach` 对象，便于调试和脚本化测试。
 - 升级 three.js 版本时，需要重新生成导入映射（import map）里的 `integrity` 哈希。
 

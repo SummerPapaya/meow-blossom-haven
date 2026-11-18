@@ -6,6 +6,10 @@
   <b>English</b> · <a href="README.zh-CN.md">简体中文</a>
 </p>
 
+<p align="center">
+  <a href="https://summerpapaya.github.io/meow-blossom-haven/"><b>▶ Live demo</b></a>
+</p>
+
 # Meow Blossom Haven
 
 An interactive, dreamy 3D home for **Peach (猪猪)**, a ragdoll cat — five floating islands, each with its own cat tree, bed, tunnel and toys, wrapped in a soft fairy-tale atmosphere. Everything is built procedurally with [three.js](https://threejs.org) in a single HTML file: no models, images or audio files to download.
@@ -32,7 +36,7 @@ The page loads three.js as ES modules, so it must be served over HTTP (opening t
 python3 -m http.server 8791 --bind 127.0.0.1
 ```
 
-Then open <http://localhost:8791/peach-cottage.html>. Any static host (GitHub Pages, Netlify, …) works too.
+Then open <http://localhost:8791/>. Any static host (GitHub Pages, Netlify, …) works too.
 
 An internet connection is needed on first load for three.js (jsDelivr) and the title font (Google Fonts).
 
@@ -64,7 +68,7 @@ Recent Chrome, Edge, Safari and Firefox with WebGL 2. The scene lowers its own q
 
 ## Development
 
-- Everything lives in `peach-cottage.html`, organised in commented sections (renderer, fur shader, islands, Peach, behaviour, audio, UI).
+- Everything lives in `index.html`, organised in commented sections (renderer, fur shader, islands, Peach, behaviour, audio, UI).
 - `?auto` skips the start screen; `?debug` exposes a `window.peach` object for inspection and scripted testing.
 - If you upgrade three.js, regenerate the `integrity` hashes in the import map.
 
