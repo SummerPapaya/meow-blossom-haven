@@ -1775,9 +1775,9 @@ function updateEnv(dt, t) {
   sun.color.copy(E.sun); sun.intensity = E.sunI * E.dim; hemi.color.copy(E.hs); hemi.groundColor.copy(E.hg); hemi.intensity = E.hI * (.75 + .25 * E.dim) * .72;
   if (E.sea > .01) { hemi.color.lerp(tmpC.setHex(0x8fdcff), .5 * E.sea); hemi.groundColor.lerp(tmpC.setHex(0x2f72a0), .5 * E.sea); sun.color.lerp(tmpC.setHex(0xbfeaff), .5 * E.sea); }
   // daylight washes the pastel islands out, so push saturation / contrast / mid-tones there (the forest is already rich)
-  E.vivid = damp(E.vivid || 0, (1 - E.night) * (1 - .5 * E.grey) * ({ forest: .3, cloud: 1.1, ocean: 1.4 }[env.island] ?? 1), 2.5, dt);
-  renderer.toneMappingExposure = E.exp * (1 - .08 * E.vivid); bloom.strength = .3 + .3 * E.night;
-  grade.uniforms.uSat.value = 1.24 + .2 * E.vivid; grade.uniforms.uCon.value = 1.03 + .11 * E.vivid; grade.uniforms.uGam.value = 1 + .14 * E.vivid;
+  E.vivid = damp(E.vivid || 0, (1 - E.night) * (1 - .5 * E.grey) * ({ forest: .3, cloud: 1.1, ocean: 1.3 }[env.island] ?? 1), 2.5, dt);
+  renderer.toneMappingExposure = E.exp * (1 - .05 * E.vivid); bloom.strength = .3 + .3 * E.night;
+  grade.uniforms.uSat.value = 1.24 + .08 * E.vivid; grade.uniforms.uCon.value = 1.03 + .06 * E.vivid; grade.uniforms.uGam.value = 1 + .09 * E.vivid;
   starMats[0].opacity = E.star * (1 - E.grey) * (.75 + .25 * Math.sin(t * 1.7)); starMats[1].opacity = E.star * (1 - E.grey) * (.75 + .25 * Math.sin(t * 2.3 + 2));
   orb.position.copy(E.orbP); orb.scale.setScalar(E.orbS); orb.material.color.copy(E.orbC).multiplyScalar(1.6); orb.material.opacity = 1 - E.grey * .95; orbGlow.material.color.copy(E.orbC); orbGlow.material.opacity = (1 - E.grey) * .8;
   // lamps
