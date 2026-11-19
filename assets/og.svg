@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
-  <!-- Source for assets/og.png (social share image). Render: headless Chrome screenshot at 1200x630. -->
+  <!-- Source for assets/og.png (social share image). Title and main island sit inside the centre 630x630 square, so square crops (e.g. WeChat) stay complete. Render: headless Chrome screenshot at 1200x630. -->
   <style>@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,700&amp;display=block');</style>
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
@@ -43,15 +43,15 @@
     <g id="star"><path d="M0-6 1.6-1.6 6 0 1.6 1.6 0 6-1.6 1.6-6 0-1.6-1.6Z" fill="#fff4d0"/></g>
     <g id="petal"><ellipse rx="6" ry="3.4" fill="#ffc1d9"/></g>
   </defs>
-  <rect width="1200" height="630" fill="url(#sky)"/>
   <filter id="haze" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="50"/></filter>
+  <rect width="1200" height="630" fill="url(#sky)"/>
   <ellipse cx="600" cy="680" rx="760" ry="180" fill="#ffc8ec" opacity=".22" filter="url(#haze)"/>
-  <g><use href="#star" transform="translate(60 40) scale(1)"/><use href="#star" transform="translate(250 60) scale(0.7)"/><use href="#star" transform="translate(330 30) scale(1)"/><use href="#star" transform="translate(700 40) scale(0.8)"/><use href="#star" transform="translate(980 50) scale(1)"/><use href="#star" transform="translate(1140 110) scale(0.7)"/><use href="#star" transform="translate(1100 30) scale(0.6)"/><use href="#star" transform="translate(620 200) scale(0.6)"/><use href="#star" transform="translate(560 420) scale(0.7)"/><use href="#star" transform="translate(70 440) scale(0.6)"/><use href="#star" transform="translate(330 470) scale(0.8)"/><use href="#star" transform="translate(1150 560) scale(0.7)"/><use href="#star" transform="translate(620 600) scale(0.6)"/><use href="#star" transform="translate(40 600) scale(0.7)"/><circle cx="392" cy="102" r="1.2" fill="#fff" opacity="0.39"/><circle cx="642" cy="233" r="0.7" fill="#fff" opacity="0.63"/><circle cx="54" cy="275" r="0.7" fill="#fff" opacity="0.40"/><circle cx="511" cy="514" r="0.7" fill="#fff" opacity="0.47"/><circle cx="750" cy="588" r="1.1" fill="#fff" opacity="0.57"/><circle cx="1162" cy="38" r="1.4" fill="#fff" opacity="0.51"/><circle cx="180" cy="82" r="0.9" fill="#fff" opacity="0.80"/><circle cx="223" cy="365" r="1.2" fill="#fff" opacity="0.55"/><circle cx="656" cy="48" r="0.7" fill="#fff" opacity="0.46"/><circle cx="813" cy="271" r="0.9" fill="#fff" opacity="0.67"/><circle cx="545" cy="193" r="1.3" fill="#fff" opacity="0.73"/><circle cx="298" cy="360" r="1.1" fill="#fff" opacity="0.83"/><circle cx="871" cy="186" r="1.5" fill="#fff" opacity="0.41"/><circle cx="503" cy="472" r="0.7" fill="#fff" opacity="0.62"/><circle cx="56" cy="418" r="1.3" fill="#fff" opacity="0.67"/><circle cx="1043" cy="201" r="1.2" fill="#fff" opacity="0.68"/><circle cx="694" cy="288" r="1.4" fill="#fff" opacity="0.87"/><circle cx="569" cy="415" r="0.7" fill="#fff" opacity="0.74"/><circle cx="774" cy="616" r="1.3" fill="#fff" opacity="0.51"/><circle cx="465" cy="418" r="0.6" fill="#fff" opacity="0.60"/><circle cx="208" cy="81" r="0.7" fill="#fff" opacity="0.77"/><circle cx="163" cy="161" r="1.0" fill="#fff" opacity="0.83"/><circle cx="105" cy="284" r="1.1" fill="#fff" opacity="0.84"/><circle cx="977" cy="537" r="0.9" fill="#fff" opacity="0.58"/><circle cx="433" cy="549" r="1.5" fill="#fff" opacity="0.43"/><circle cx="218" cy="151" r="0.8" fill="#fff" opacity="0.62"/><circle cx="705" cy="170" r="0.6" fill="#fff" opacity="0.58"/><circle cx="446" cy="355" r="1.5" fill="#fff" opacity="0.73"/><circle cx="618" cy="387" r="1.2" fill="#fff" opacity="0.38"/><circle cx="1071" cy="486" r="1.4" fill="#fff" opacity="0.79"/><circle cx="473" cy="253" r="0.7" fill="#fff" opacity="0.70"/><circle cx="83" cy="51" r="0.8" fill="#fff" opacity="0.44"/><circle cx="411" cy="42" r="0.6" fill="#fff" opacity="0.43"/><circle cx="130" cy="232" r="0.6" fill="#fff" opacity="0.83"/><circle cx="735" cy="101" r="0.8" fill="#fff" opacity="0.54"/><circle cx="440" cy="85" r="1.4" fill="#fff" opacity="0.90"/><circle cx="560" cy="305" r="0.7" fill="#fff" opacity="0.41"/><circle cx="414" cy="172" r="1.3" fill="#fff" opacity="0.44"/><circle cx="37" cy="590" r="1.1" fill="#fff" opacity="0.43"/><circle cx="651" cy="26" r="1.1" fill="#fff" opacity="0.89"/></g>
-  <circle cx="575" cy="78" r="80" fill="url(#moonGlow)"/>
-  <circle cx="575" cy="78" r="27" fill="#fff4cf"/>
+  <g><use href="#star" transform="translate(60 50) scale(1)"/><use href="#star" transform="translate(250 90) scale(0.7)"/><use href="#star" transform="translate(330 40) scale(0.8)"/><use href="#star" transform="translate(880 40) scale(0.8)"/><use href="#star" transform="translate(1150 60) scale(0.9)"/><use href="#star" transform="translate(1150 380) scale(0.7)"/><use href="#star" transform="translate(40 390) scale(0.6)"/><use href="#star" transform="translate(260 600) scale(0.7)"/><use href="#star" transform="translate(1130 610) scale(0.6)"/><use href="#star" transform="translate(820 190) scale(0.5)"/><use href="#star" transform="translate(380 210) scale(0.5)"/><circle cx="544" cy="351" r="1.4" fill="#fff" opacity="0.61"/><circle cx="609" cy="368" r="0.8" fill="#fff" opacity="0.63"/><circle cx="753" cy="494" r="0.7" fill="#fff" opacity="0.52"/><circle cx="117" cy="504" r="1.2" fill="#fff" opacity="0.37"/><circle cx="1169" cy="599" r="1.2" fill="#fff" opacity="0.69"/><circle cx="196" cy="19" r="1.1" fill="#fff" opacity="0.38"/><circle cx="234" cy="158" r="0.6" fill="#fff" opacity="0.61"/><circle cx="530" cy="524" r="1.1" fill="#fff" opacity="0.70"/><circle cx="600" cy="414" r="1.0" fill="#fff" opacity="0.50"/><circle cx="1187" cy="617" r="1.4" fill="#fff" opacity="0.74"/><circle cx="382" cy="150" r="0.9" fill="#fff" opacity="0.39"/><circle cx="914" cy="254" r="1.4" fill="#fff" opacity="0.56"/><circle cx="1140" cy="527" r="0.6" fill="#fff" opacity="0.47"/><circle cx="1084" cy="297" r="1.5" fill="#fff" opacity="0.57"/><circle cx="96" cy="394" r="1.3" fill="#fff" opacity="0.50"/><circle cx="113" cy="213" r="1.5" fill="#fff" opacity="0.77"/><circle cx="149" cy="160" r="0.7" fill="#fff" opacity="0.38"/><circle cx="950" cy="118" r="1.1" fill="#fff" opacity="0.60"/><circle cx="235" cy="456" r="0.7" fill="#fff" opacity="0.70"/><circle cx="147" cy="267" r="0.8" fill="#fff" opacity="0.50"/><circle cx="1156" cy="500" r="0.9" fill="#fff" opacity="0.84"/><circle cx="259" cy="251" r="1.4" fill="#fff" opacity="0.70"/><circle cx="128" cy="613" r="0.8" fill="#fff" opacity="0.49"/><circle cx="922" cy="211" r="0.9" fill="#fff" opacity="0.39"/><circle cx="116" cy="365" r="0.8" fill="#fff" opacity="0.68"/><circle cx="449" cy="286" r="1.5" fill="#fff" opacity="0.62"/><circle cx="688" cy="539" r="0.8" fill="#fff" opacity="0.43"/><circle cx="1082" cy="509" r="0.8" fill="#fff" opacity="0.45"/><circle cx="883" cy="584" r="0.8" fill="#fff" opacity="0.87"/><circle cx="1051" cy="378" r="1.0" fill="#fff" opacity="0.41"/><circle cx="56" cy="597" r="0.8" fill="#fff" opacity="0.74"/><circle cx="313" cy="512" r="1.1" fill="#fff" opacity="0.51"/><circle cx="217" cy="449" r="0.7" fill="#fff" opacity="0.48"/><circle cx="670" cy="530" r="1.2" fill="#fff" opacity="0.50"/><circle cx="1092" cy="134" r="0.6" fill="#fff" opacity="0.50"/><circle cx="1167" cy="411" r="1.2" fill="#fff" opacity="0.67"/><circle cx="176" cy="31" r="0.6" fill="#fff" opacity="0.85"/><circle cx="837" cy="597" r="0.6" fill="#fff" opacity="0.70"/><circle cx="579" cy="456" r="0.9" fill="#fff" opacity="0.90"/><circle cx="99" cy="343" r="1.3" fill="#fff" opacity="0.85"/><circle cx="880" cy="439" r="1.3" fill="#fff" opacity="0.85"/><circle cx="425" cy="428" r="1.4" fill="#fff" opacity="0.83"/><circle cx="502" cy="492" r="1.4" fill="#fff" opacity="0.67"/></g>
+  <circle cx="1040" cy="92" r="78" fill="url(#moonGlow)"/>
+  <circle cx="1040" cy="92" r="26" fill="#fff4cf"/>
   <!-- the other four islands, small and far away -->
   <!-- Forest Treehouse -->
-  <g transform="translate(150 178) scale(.98)" opacity=".92"><g class="rock" style="animation-delay:-1.5s">
+  <g transform="translate(140 250) scale(1)" opacity=".92"><g class="rock" style="animation-delay:-1.5s">
     <path d="M-54 0 Q0 10 54 0 L40 16 Q20 34 0 44 Q-20 34 -40 16Z" fill="url(#rock)"/>
     <path d="M-30 14 q-3 12 2 20 M26 16 q4 10 -1 18" stroke="#6fbf7a" stroke-width="2" fill="none" stroke-linecap="round"/>
     <ellipse rx="54" ry="7" fill="#8fd08a"/>
@@ -62,7 +62,7 @@
     <g transform="translate(0 -46)"><rect x="-14" y="-14" width="28" height="16" rx="2" fill="#d6a983"/><path d="M-18 -14 L0 -28 L18 -14Z" fill="#e88ea2"/><rect x="-4" y="-10" width="8" height="8" rx="2" fill="#ffe9a8" filter="url(#glow)" class="bulb"/><path d="M-17 2 h34" stroke="#8a6656" stroke-width="2"/></g>
   </g></g>
   <!-- Moonlit Cloud Isle -->
-  <g transform="translate(400 160) scale(.9)" opacity=".92"><g class="rock" style="animation-delay:-3.2s">
+  <g transform="translate(1060 250) scale(.95)" opacity=".92"><g class="rock" style="animation-delay:-3.2s">
     <g fill="#ddd5ff"><ellipse cx="-28" cy="16" rx="24" ry="14"/><ellipse cx="26" cy="18" rx="26" ry="14"/><ellipse cx="0" cy="26" rx="22" ry="12"/></g>
     <g fill="#f7f3ff"><ellipse cx="0" cy="6" rx="54" ry="13"/><ellipse cx="-30" cy="11" rx="22" ry="11"/><ellipse cx="26" cy="12" rx="24" ry="11"/><ellipse cx="0" cy="18" rx="20" ry="10"/></g>
     <ellipse rx="48" ry="6" fill="#cdd5ff"/>
@@ -71,7 +71,7 @@
     <ellipse cx="28" cy="-3" rx="11" ry="5" fill="#ffffff"/>
   </g></g>
   <!-- Candy Tea Party -->
-  <g transform="translate(462 540) scale(.9)" opacity=".92"><g class="rock" style="animation-delay:-.6s">
+  <g transform="translate(1070 520) scale(.95)" opacity=".92"><g class="rock" style="animation-delay:-.6s">
     <path d="M-54 0 Q0 10 54 0 L40 16 Q20 34 0 44 Q-20 34 -40 16Z" fill="url(#candyRock)"/>
     <ellipse rx="54" ry="7" fill="#fff0f6"/>
     <g fill="#fff0f6"><circle cx="-40" cy="6" r="4"/><circle cx="-18" cy="9" r="5"/><circle cx="8" cy="9" r="4"/><circle cx="32" cy="7" r="5"/></g>
@@ -82,7 +82,7 @@
     <g transform="translate(46 -30)"><circle r="7" fill="#ffd8ec"/><circle cx="6" cy="-3" r="5" fill="#ffc4e2"/></g>
   </g></g>
   <!-- Ocean Deep -->
-  <g transform="translate(184 548) scale(.98)" opacity=".92"><g class="rock" style="animation-delay:-2.4s">
+  <g transform="translate(140 520) scale(1)" opacity=".92"><g class="rock" style="animation-delay:-2.4s">
     <path d="M-54 0 Q0 10 54 0 L40 16 Q20 34 0 44 Q-20 34 -40 16Z" fill="url(#seaRock)"/>
     <path d="M-50 0 A50 46 0 0 1 50 0Z" fill="url(#sea)"/>
     <ellipse rx="52" ry="7" fill="#f3dfb8"/>
@@ -94,7 +94,7 @@
     <path d="M-50 0 A50 46 0 0 1 50 0" fill="none" stroke="#dff6ff" stroke-opacity=".7" stroke-width="1.6" class="shim"/>
   </g></g>
 
-  <g transform="translate(189 -21) scale(1.2)">
+  <g transform="translate(-90 72) scale(1.15)">
   <g class="isle">
     <!-- barrier bubble -->
     <path d="M378 276 A222 150 0 0 1 822 276" fill="url(#dome)"/>
@@ -164,9 +164,8 @@
   </g>
   </g>
 
-  <g><use href="#petal" transform="translate(540 250) rotate(30)" opacity=".85"/><use href="#petal" transform="translate(600 470) rotate(-20)" opacity=".85"/><use href="#petal" transform="translate(90 330) rotate(60)" opacity=".85"/><use href="#petal" transform="translate(1120 600) rotate(10)" opacity=".85"/><use href="#petal" transform="translate(380 420) rotate(-40)" opacity=".85"/></g>
-  <text x="62" y="318" font-family="Cormorant Garamond, Georgia, serif" font-style="italic" font-weight="700" font-size="62" fill="url(#title)" filter="url(#glow)">Meow Blossom Haven</text>
-  <text x="66" y="368" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans SC',sans-serif" font-size="26" letter-spacing="5" fill="#f4e9ff">猪猪 Peach 的喵喵仙境</text>
-  <text x="66" y="408" font-family="Georgia, serif" font-style="italic" font-size="21" letter-spacing="1" fill="#e6dbff" opacity=".85">A dreamy 3D home for a ragdoll cat</text>
-  <text x="66" y="446" font-family="'PingFang SC','Helvetica Neue',sans-serif" font-size="16" letter-spacing="1.5" fill="#ffd6e8" opacity=".8">✦ meow-blossom-haven.summercommences.com</text>
+  <g><use href="#petal" transform="translate(320 300) rotate(30)" opacity=".85"/><use href="#petal" transform="translate(890 330) rotate(-20)" opacity=".85"/><use href="#petal" transform="translate(250 420) rotate(60)" opacity=".85"/><use href="#petal" transform="translate(950 600) rotate(10)" opacity=".85"/><use href="#petal" transform="translate(330 560) rotate(-40)" opacity=".85"/></g>
+  <text x="600" y="98" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-style="italic" font-weight="700" font-size="60" fill="url(#title)" filter="url(#glow)">Meow Blossom Haven</text>
+  <text x="600" y="142" text-anchor="middle" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans SC',sans-serif" font-size="25" letter-spacing="5" fill="#f4e9ff">猪猪 Peach 的喵喵仙境</text>
+  <text x="600" y="602" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="21" letter-spacing="1" fill="#efe6ff" opacity=".9">A dreamy 3D home for a ragdoll cat</text>
 </svg>
