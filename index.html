@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Meow Blossom Haven · 猪猪的小屋</title>
 <meta name="description" content="A dreamy, interactive 3D home for Peach the ragdoll cat: five floating islands to explore. 布偶猫猪猪的梦幻 3D 浮空岛小屋。">
 <meta name="theme-color" content="#2a1f63">
@@ -28,50 +28,54 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;height:100%;overflow:hidden;background:#0b0f2e;color:var(--ink);
     font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
-  canvas{display:block;position:fixed;inset:0;touch-action:none}
+  canvas{display:block;position:fixed;top:0;right:0;bottom:0;left:0;touch-action:none}
   button{font:inherit;color:var(--ink);cursor:pointer;transition:.22s}
-  .glass{background:linear-gradient(160deg,rgba(98,70,156,.58),rgba(58,40,112,.5));border:1px solid var(--gold);
-    backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);
+  .glass{background:linear-gradient(160deg,rgba(98,70,156,.82),rgba(58,40,112,.78));border:1px solid var(--gold);
     box-shadow:0 10px 36px rgba(30,14,70,.26),inset 0 1px 0 rgba(255,255,255,.32)}
+  @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+    .glass{background:linear-gradient(160deg,rgba(98,70,156,.58),rgba(58,40,112,.5));-webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%)}}
   .glass,#title b{text-shadow:0 1px 5px rgba(40,20,80,.55)}
   #title b{text-shadow:0 0 18px rgba(255,190,220,.75),0 2px 10px rgba(30,10,70,.65),0 0 3px rgba(40,20,80,.6)}
   .serif{font-family:"Cormorant Garamond","Songti SC","STSong","Noto Serif SC",Georgia,serif}
   /* title */
-  #title{position:fixed;left:20px;top:16px;pointer-events:none;max-width:70vw}
+  #title{position:fixed;left:20px;top:16px;top:calc(16px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));pointer-events:none;max-width:70vw}
   #title b{display:block;font-size:30px;font-style:italic;font-weight:700;letter-spacing:.02em;line-height:1.05;
     text-shadow:0 0 18px rgba(255,190,220,.75),0 2px 10px rgba(30,10,70,.5)}
   #title b::before{content:"✦ ";font-style:normal;font-size:16px;vertical-align:middle;color:#ffe2b0}
   #status{display:inline-block;margin-top:8px;padding:5px 14px;border-radius:999px;font-size:12.5px;letter-spacing:.06em}
   /* environment dock */
-  #dock{position:fixed;right:14px;top:0;bottom:0;margin:auto 0;height:fit-content;display:flex;flex-direction:column;align-items:center;gap:min(9px,1.6vh);padding:min(10px,1.8vh) 8px;border-radius:999px}
+  #dock{position:fixed;right:14px;top:0;bottom:0;margin:auto 0;height:-webkit-fit-content;height:fit-content;display:flex;flex-direction:column;align-items:center;padding:8px;padding:min(10px,1.8vh) 8px;border-radius:999px}
+  #dock>*+*{margin-top:8px;margin-top:min(9px,1.6vh)} .supports-flex-gap #dock{gap:9px;gap:min(9px,1.6vh)} .supports-flex-gap #dock>*+*{margin-top:0}
   .orb{position:relative}
-  .rb{width:clamp(30px,8.4vh,42px);height:clamp(30px,8.4vh,42px);border-radius:50%;padding:0;font-size:19px;display:grid;place-items:center;border:1px solid var(--gold);
+  .rb{width:38px;height:38px;width:clamp(30px,8.4vh,42px);height:clamp(30px,8.4vh,42px);border-radius:50%;padding:0;font-size:19px;display:grid;place-items:center;border:1px solid var(--gold);
     background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.38),rgba(255,255,255,.05) 70%)}
   .rb:hover{transform:scale(1.1);box-shadow:0 0 18px var(--glow)}
   .rb.on,.orb.open .rb{background:radial-gradient(circle at 35% 28%,#fff6dc,#ffcfe0 55%,#cdb9ff);box-shadow:0 0 16px rgba(255,210,228,.85);border-color:transparent}
   .sep{width:18px;height:1px;background:var(--gold)}
-  .fly{position:absolute;right:56px;top:-12px;display:none;gap:6px;padding:7px 12px;border-radius:999px}
+  .fly{position:absolute;right:56px;top:-12px;display:none;padding:7px 12px;border-radius:999px}
+  .fly>*+*{margin-left:6px} .supports-flex-gap .fly{gap:6px} .supports-flex-gap .fly>*+*{margin-left:0}
   .orb.open .fly{display:flex}
-  .fly button{display:grid;justify-items:center;gap:1px;background:none;border:none;padding:2px 5px;font-size:21px;opacity:.82}
+  .fly button{display:grid;justify-items:center;grid-gap:1px;gap:1px;background:none;border:none;padding:2px 5px;font-size:21px;opacity:.82}
   .fly button small{font-size:11px;letter-spacing:.1em;white-space:nowrap}
   .fly button:hover{opacity:1;transform:translateY(-2px)}
   .fly button.on{opacity:1;text-shadow:0 0 10px #ffdca8} .fly button.on small{color:#ffe7b4;font-weight:700}
   /* action charms */
-  #actions{position:fixed;left:0;right:0;bottom:14px;margin:0 auto;width:fit-content;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 14px;padding:10px 20px 8px;border-radius:30px;
+  #actions{position:fixed;left:0;right:0;bottom:14px;bottom:calc(14px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));margin:0 auto;width:-webkit-fit-content;width:fit-content;display:flex;flex-wrap:wrap;justify-content:center;padding:5px 13px 3px;border-radius:30px;
     max-width:calc(100vw - 16px)}
-  #actions button{display:grid;justify-items:center;gap:4px;background:none;border:none;padding:0;font-size:11.5px;letter-spacing:.1em;white-space:nowrap}
+  #actions button{margin:5px 7px;display:grid;justify-items:center;grid-gap:4px;gap:4px;background:none;border:none;padding:0;font-size:11.5px;letter-spacing:.1em;white-space:nowrap}
   #actions i{font-style:normal;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:21px;border:1px solid var(--gold);transition:.22s;
     background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.38),rgba(255,255,255,.05) 70%)}
   #actions button:hover i{transform:translateY(-4px) scale(1.08);box-shadow:0 8px 22px var(--glow);background:radial-gradient(circle at 35% 28%,#fff6dc,#ffcfe0 55%,#cdb9ff)}
+  .supports-flex-gap #actions{gap:10px 14px;padding:10px 20px 8px} .supports-flex-gap #actions button{margin:0}
   #hint{position:fixed;left:0;right:0;bottom:96px;text-align:center;font-size:12px;color:rgba(255,247,239,.7);pointer-events:none;letter-spacing:.12em;
     text-shadow:0 1px 6px rgba(0,0,0,.45);white-space:nowrap}
   #tip{position:fixed;pointer-events:none;padding:5px 13px;font-size:12.5px;border-radius:999px;display:none;letter-spacing:.06em;
     background:rgba(70,40,95,.82);border:1px solid var(--gold);white-space:nowrap}
-  #flash{position:fixed;inset:0;pointer-events:none;z-index:4;display:none;opacity:0;transition:opacity .4s;background:radial-gradient(circle at 50% 55%,#d9c8f6,#a48fdc 50%,#5d4fae)}
+  #flash{position:fixed;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:4;display:none;opacity:0;transition:opacity .4s;background:radial-gradient(circle at 50% 55%,#d9c8f6,#a48fdc 50%,#5d4fae)}
   /* start */
-  #start{position:fixed;inset:0;display:grid;place-items:center;text-align:center;z-index:10;transition:opacity .9s;
+  #start{position:fixed;top:0;right:0;bottom:0;left:0;display:grid;place-items:center;text-align:center;z-index:10;transition:opacity .9s;
     background:radial-gradient(ellipse at 50% 35%,rgba(140,100,210,.55),rgba(11,15,46,.93))}
-  #start h1{margin:0;font-size:clamp(36px,7vw,68px);font-style:italic;font-weight:700;
+  #start h1{margin:0;font-size:48px;font-size:clamp(36px,7vw,68px);font-style:italic;font-weight:700;
     background:linear-gradient(120deg,#ffd6e8,#fff6e0,#cdb9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
   #start p{margin:10px 0 28px;opacity:.85;font-size:15px;letter-spacing:.3em}
   #start button{font-size:16px;letter-spacing:.2em;padding:13px 36px;border-radius:999px;border:none;font-weight:700;color:#5a3565;
@@ -79,10 +83,14 @@
   #start button:hover{box-shadow:0 10px 50px rgba(255,200,230,.8)}
   #start button:disabled{opacity:.55;cursor:default;box-shadow:none}
   #start small{display:block;margin-top:18px;opacity:.55;font-size:12px;letter-spacing:.1em}
+  #fallback{position:fixed;top:0;right:0;bottom:0;left:0;z-index:12;display:none;align-content:center;justify-items:center;text-align:center;padding:24px;
+    background:radial-gradient(ellipse at 50% 35%,#5a3fa6,#1d1650)}
+  #fallback b{font:italic 700 30px Georgia,serif;color:#ffe3f0} #fallback p{max-width:22em;margin:14px 0 20px;line-height:1.6;opacity:.85}
+  #fallback button{padding:10px 28px;border-radius:999px;border:none;font-weight:700;color:#5a3565;background:linear-gradient(135deg,#fff0d0,#ffc4dc,#cdb9ff)}
   @media (max-width:720px),(max-height:560px){
     #title b{font-size:22px} #hint{display:none}
-    #dock{gap:6px;padding:7px 6px;right:8px} .rb{width:36px;height:36px;font-size:16px} .fly{right:48px}
-    #actions{gap:10px;padding:8px 14px 6px} #actions i{width:38px;height:38px;font-size:18px}
+    #dock{padding:7px 6px;right:8px} #dock>*+*{margin-top:6px} .supports-flex-gap #dock{gap:6px} .supports-flex-gap #dock>*+*{margin-top:0} .rb{width:36px;height:36px;font-size:16px} .fly{right:48px}
+    #actions{padding:3px 9px 1px} #actions button{margin:5px} .supports-flex-gap #actions{gap:10px;padding:8px 14px 6px} .supports-flex-gap #actions button{margin:0} #actions i{width:38px;height:38px;font-size:18px}
   }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -160,6 +168,20 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
+/* ───────────── platform ───────────── */
+{ // older engines (e.g. Chrome 61) lay out flex `gap` as nothing; measure the real behaviour once, CSS uses margins unless this class is present
+  const f = document.createElement('div'); f.style.cssText = 'position:absolute;visibility:hidden;display:flex;flex-direction:column;row-gap:1px';
+  f.appendChild(document.createElement('div')); f.appendChild(document.createElement('div')); document.body.appendChild(f);
+  if (f.scrollHeight === 1) document.documentElement.classList.add('supports-flex-gap'); f.remove(); }
+function showFallback(zh, en, retry) { // shown instead of a blank page when WebGL is unavailable or the context is lost
+  let el = document.getElementById('fallback');
+  if (!el) { el = document.createElement('div'); el.id = 'fallback'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  const en_ = typeof lang !== 'undefined' && lang === 'en'; el.textContent = '';
+  const h = document.createElement('b'); h.textContent = 'Meow Blossom Haven'; const t = document.createElement('p'); t.textContent = en_ ? en : zh; el.append(h, t);
+  if (retry) { const b = document.createElement('button'); b.textContent = en_ ? 'Reload' : '重新加载'; b.addEventListener('click', () => location.reload()); el.appendChild(b); }
+  el.style.display = 'grid'; const st = document.getElementById('start'); if (st) st.style.display = 'none';
+}
+
 /* ───────────── helpers ───────────── */
 const V3 = THREE.Vector3, PI = Math.PI;
 const rnd = (a = 1, b) => b === undefined ? Math.random() * a : a + Math.random() * (b - a);
@@ -207,7 +229,9 @@ function applyLang() {
 }
 
 /* ───────────── renderer ───────────── */
-const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' }); }
+catch (e) { showFallback('这台设备暂时无法显示 3D 画面（WebGL 不可用）。可以换一台设备，或更新浏览器后再试。', 'This device cannot show the 3D scene (WebGL is unavailable). Try another device, or update your browser.', true); throw e; }
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -1892,7 +1916,19 @@ function autoQuality(raw) { // measure real frame rate while visible; step quali
   }
 }
 let frameN = 0;
-function frame() { const raw = clock.getDelta(); autoQuality(raw); step(Math.min(raw, .05)); if ((frameN++ & 1) === 0) renderer.shadowMap.needsUpdate = true; composer.render(); requestAnimationFrame(frame); }
+let paused = false, lost = false;
+function frame() {
+  if (document.hidden || lost) { paused = true; return; } // stop the loop while hidden or without a GL context; resumed below
+  const raw = clock.getDelta(); autoQuality(raw); step(Math.min(raw, .05)); if ((frameN++ & 1) === 0) renderer.shadowMap.needsUpdate = true; composer.render(); requestAnimationFrame(frame);
+}
+function resume() { if (paused && !lost && !document.hidden) { paused = false; clock.getDelta(); requestAnimationFrame(frame); } } // getDelta() drops the hidden time
+document.addEventListener('visibilitychange', () => {
+  const c = AU.ctx; if (document.hidden) { if (c && c.state === 'running') { c.suspend(); AU.hidPaused = true; } }
+  else { if (c && AU.hidPaused) { c.resume(); AU.hidPaused = false; } resume(); }
+});
+renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; const st = $('#start'); AU.startWasShown = !!st && st.style.display !== 'none';
+  showFallback('画面暂时中断了（图形资源被系统回收），正在等待恢复。', 'The 3D view was interrupted (graphics memory was reclaimed). Waiting for it to come back.', true); });
+renderer.domElement.addEventListener('webglcontextrestored', () => { lost = false; const fb = $('#fallback'); if (fb) fb.style.display = 'none'; const st = $('#start'); if (st && AU.startWasShown) st.style.display = ''; renderer.shadowMap.needsUpdate = true; resume(); });
 if (new URLSearchParams(location.search).has('debug')) window.peach = { THREE, renderer, scene, composer, scrub, perf, ISL, obstacles, cat, command, setEnv, setIsland, travel, env, camera, controls, AU, home, tick: (n = 60) => { for (let i = 0; i < n; i++) step(1 / 30); renderer.shadowMap.needsUpdate = true; composer.render(); }, bakeStat };
 (async () => { // compile all shaders up front (parallel where the GPU driver allows) so neither the first frame nor an island switch stalls
   const t0 = performance.now(); step(1 / 30); // first step builds the environment map, so materials compile in their final form
