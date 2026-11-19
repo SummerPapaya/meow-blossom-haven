@@ -215,7 +215,11 @@ const EN = {
   '让猪猪去睡觉': 'Send Peach to nap', '让猪猪爬花花猫爬架': 'Send Peach up the cat tree', '让猪猪钻隧道': 'Send Peach through the tunnel', '踢一下毛线球': 'Kick the yarn ball', '逗逗小鱼玩偶': 'Tease with the fish toy', '铲屎 🧹': 'Scoop the litter 🧹',
 };
 let lang = 'zh', statusRaw = '猪猪正在等你…';
-try { const v = localStorage.getItem('mbh-lang'); lang = v === 'en' || v === 'zh' ? v : ((navigator.language || 'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en'); } catch (e) { lang = (navigator.language || 'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en'; }
+// ?lang=zh or ?lang=en in the address picks the language outright (links from other sites carry it);
+// otherwise the visitor's saved choice, then the system language
+const urlLang = (() => { const q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase(); return q.startsWith('zh') ? 'zh' : q.startsWith('en') ? 'en' : null; })();
+const sysLang = () => (navigator.language || 'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+try { const v = localStorage.getItem('mbh-lang'); lang = urlLang || (v === 'en' || v === 'zh' ? v : sysLang()); } catch (e) { lang = urlLang || sysLang(); }
 const tr = s => typeof s === 'object' ? s[lang] : lang === 'en' ? (EN[s] ?? s) : s;
 function setStatus(s) { statusRaw = s; const el = document.querySelector('#status'); if (el) el.textContent = tr(s); }
 function applyLang() {
@@ -1887,7 +1891,12 @@ setOrb('island', env.island);
 document.querySelectorAll('#actions button').forEach(b => b.onclick = () => command(b.dataset.cmd));
 $('#snd').onclick = e => { const on = AU.toggle(); e.currentTarget.classList.toggle('on', on); e.currentTarget.textContent = on ? '🔊' : '🔇'; };
 $('#follow').onclick = e => { follow = !follow; e.currentTarget.classList.toggle('on', follow); };
-$('#lang').onclick = () => { lang = lang === 'en' ? 'zh' : 'en'; try { localStorage.setItem('mbh-lang', lang); } catch (e) {} applyLang(); };
+$('#lang').onclick = () => {
+  lang = lang === 'en' ? 'zh' : 'en'; try { localStorage.setItem('mbh-lang', lang); } catch (e) {}
+  // drop ?lang= from the address once the visitor picks a language, so a reload keeps their choice
+  if (urlLang) try { const u = new URL(location.href); u.searchParams.delete('lang'); history.replaceState(history.state, '', u); } catch (e) {}
+  applyLang();
+};
 applyLang();
 function enter(withSound) { if (withSound) { AU.init(); setTimeout(() => AU.meow(), 900); } const s = $('#start'); s.style.opacity = 0; setTimeout(() => s.remove(), 900); lastInput = performance.now(); }
 $('#enter').onclick = () => enter(true);

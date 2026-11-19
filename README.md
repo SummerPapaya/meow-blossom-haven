@@ -48,7 +48,7 @@ An internet connection is needed on first load for three.js (jsDelivr) and the t
 | Interact | Click Peach, toys or furniture, or use the buttons at the bottom |
 | Island, season, time, weather, music | The round buttons on the right |
 | Follow Peach | 👀 |
-| Language | 中 / EN |
+| Language | 中 / EN, or add `?lang=en` / `?lang=zh` to the address |
 
 ## Browser support
 
