@@ -30,10 +30,11 @@
     font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
   canvas{display:block;position:fixed;inset:0;touch-action:none}
   button{font:inherit;color:var(--ink);cursor:pointer;transition:.22s}
-  .glass{background:linear-gradient(160deg,rgba(255,244,232,.22),rgba(214,190,255,.12));border:1px solid var(--gold);
+  .glass{background:linear-gradient(160deg,rgba(98,70,156,.58),rgba(58,40,112,.5));border:1px solid var(--gold);
     backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);
     box-shadow:0 10px 36px rgba(30,14,70,.26),inset 0 1px 0 rgba(255,255,255,.32)}
   .glass,#title b{text-shadow:0 1px 5px rgba(40,20,80,.55)}
+  #title b{text-shadow:0 0 18px rgba(255,190,220,.75),0 2px 10px rgba(30,10,70,.65),0 0 3px rgba(40,20,80,.6)}
   .serif{font-family:"Cormorant Garamond","Songti SC","STSong","Noto Serif SC",Georgia,serif}
   /* title */
   #title{position:fixed;left:20px;top:16px;pointer-events:none;max-width:70vw}
@@ -51,7 +52,7 @@
   .sep{width:18px;height:1px;background:var(--gold)}
   .fly{position:absolute;right:56px;top:-12px;display:none;gap:6px;padding:7px 12px;border-radius:999px}
   .orb.open .fly{display:flex}
-  .fly button{display:grid;justify-items:center;gap:1px;background:none;border:none;padding:2px 5px;font-size:21px;opacity:.75}
+  .fly button{display:grid;justify-items:center;gap:1px;background:none;border:none;padding:2px 5px;font-size:21px;opacity:.82}
   .fly button small{font-size:11px;letter-spacing:.1em;white-space:nowrap}
   .fly button:hover{opacity:1;transform:translateY(-2px)}
   .fly button.on{opacity:1;text-shadow:0 0 10px #ffdca8} .fly button.on small{color:#ffe7b4;font-weight:700}
@@ -229,8 +230,9 @@ const scrub = new ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexSh
 composer.addPass(scrub);
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .5, .6, 1.0);
 composer.addPass(bloom); composer.addPass(new OutputPass());
-composer.addPass(new ShaderPass({ uniforms: { tDiffuse: { value: null }, uSat: { value: 1.24 } }, vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
-  fragmentShader: `uniform sampler2D tDiffuse; uniform float uSat; varying vec2 vUv; void main(){ vec4 c=texture2D(tDiffuse,vUv); float l=dot(c.rgb,vec3(.2126,.7152,.0722)); c.rgb=mix(vec3(l),c.rgb,uSat); c.rgb=mix(c.rgb*vec3(.985,.99,1.03),c.rgb*vec3(1.03,1.005,.975),l); c.rgb*=mix(.8,1.,1.-smoothstep(.3,.9,length((vUv-.5)*vec2(1.,.86)))); c.rgb=clamp((c.rgb-.5)*1.03+.5,0.,1.); gl_FragColor=vec4(c.rgb,1.); }` }));
+const grade = new ShaderPass({ uniforms: { tDiffuse: { value: null }, uSat: { value: 1.24 }, uCon: { value: 1.03 }, uGam: { value: 1 } }, vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uSat, uCon, uGam; varying vec2 vUv; void main(){ vec4 c=texture2D(tDiffuse,vUv); float l=dot(c.rgb,vec3(.2126,.7152,.0722)); c.rgb=mix(vec3(l),c.rgb,uSat); c.rgb=mix(c.rgb*vec3(.985,.99,1.03),c.rgb*vec3(1.03,1.005,.975),l); c.rgb*=mix(.8,1.,1.-smoothstep(.3,.9,length((vUv-.5)*vec2(1.,.86)))); c.rgb=pow(clamp(c.rgb,0.,1.),vec3(uGam)); c.rgb=clamp((c.rgb-.5)*uCon+.5,0.,1.); gl_FragColor=vec4(c.rgb,1.); }` });
+composer.addPass(grade);
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
@@ -380,7 +382,7 @@ const stringLight = new THREE.PointLight(0xffd0b8, 0, 40, 1.4); stringLight.posi
 
 const TIMES = {
   dawn:  { top: 0x86a8e8, hor: 0xffc6ad, sun: 0xffcfa5, sunI: 2.0, hs: 0xdfe3ff, hg: 0xffd8c0, hI: .9, star: .06, lamp: .3, orb: [34, 8, -110], orbC: 0xffd9a0, orbS: 6, exp: 1.0, night: .2 },
-  day:   { top: 0x5fb0f2, hor: 0xd6efff, sun: 0xfff3dd, sunI: 2.9, hs: 0xeaf4ff, hg: 0xffe9d0, hI: 1.05, star: 0, lamp: 0, orb: [46, 70, -110], orbC: 0xfff6d0, orbS: 7, exp: .95, night: 0 },
+  day:   { top: 0x4fa6f0, hor: 0xbfe0ff, sun: 0xfff3dd, sunI: 2.9, hs: 0xeaf4ff, hg: 0xffe9d0, hI: 1.05, star: 0, lamp: 0, orb: [46, 70, -110], orbC: 0xfff6d0, orbS: 7, exp: .95, night: 0 },
   dusk:  { top: 0x4b3f94, hor: 0xff9a76, sun: 0xff9566, sunI: 1.7, hs: 0xcdb5ff, hg: 0xffb59a, hI: .75, star: .35, lamp: .75, orb: [-38, 7, -110], orbC: 0xffb070, orbS: 7, exp: 1.0, night: .55 },
   night: { top: 0x070b2c, hor: 0x34296e, sun: 0x9db2ff, sunI: .6, hs: 0x5a64c8, hg: 0x40305e, hI: .7, star: 1, lamp: 1, orb: [-20, 30, -110], orbC: 0xfff4cf, orbS: 3.2, exp: 1.12, night: 1 },
 };
@@ -1772,7 +1774,10 @@ function updateEnv(dt, t) {
   E.sea = damp(E.sea || 0, env.island === 'ocean' ? 1 : 0, 2.5, dt); scene.fog.color.lerp(tmpC.setHex(0x1f72ae).multiplyScalar(1 - E.night * .65), E.sea); scene.fog.near = lerp(70, 16, E.sea); scene.fog.far = lerp(220, 95, E.sea);
   sun.color.copy(E.sun); sun.intensity = E.sunI * E.dim; hemi.color.copy(E.hs); hemi.groundColor.copy(E.hg); hemi.intensity = E.hI * (.75 + .25 * E.dim) * .72;
   if (E.sea > .01) { hemi.color.lerp(tmpC.setHex(0x8fdcff), .5 * E.sea); hemi.groundColor.lerp(tmpC.setHex(0x2f72a0), .5 * E.sea); sun.color.lerp(tmpC.setHex(0xbfeaff), .5 * E.sea); }
-  renderer.toneMappingExposure = E.exp; bloom.strength = .3 + .3 * E.night;
+  // daylight washes the pastel islands out, so push saturation / contrast / mid-tones there (the forest is already rich)
+  E.vivid = damp(E.vivid || 0, (1 - E.night) * (1 - .5 * E.grey) * ({ forest: .3, cloud: 1.1, ocean: 1.4 }[env.island] ?? 1), 2.5, dt);
+  renderer.toneMappingExposure = E.exp * (1 - .08 * E.vivid); bloom.strength = .3 + .3 * E.night;
+  grade.uniforms.uSat.value = 1.24 + .2 * E.vivid; grade.uniforms.uCon.value = 1.03 + .11 * E.vivid; grade.uniforms.uGam.value = 1 + .14 * E.vivid;
   starMats[0].opacity = E.star * (1 - E.grey) * (.75 + .25 * Math.sin(t * 1.7)); starMats[1].opacity = E.star * (1 - E.grey) * (.75 + .25 * Math.sin(t * 2.3 + 2));
   orb.position.copy(E.orbP); orb.scale.setScalar(E.orbS); orb.material.color.copy(E.orbC).multiplyScalar(1.6); orb.material.opacity = 1 - E.grey * .95; orbGlow.material.color.copy(E.orbC); orbGlow.material.opacity = (1 - E.grey) * .8;
   // lamps
