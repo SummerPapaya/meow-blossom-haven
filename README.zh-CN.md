@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://summerpapaya.github.io/meow-blossom-haven/"><b>▶ 在线体验</b></a>
+  <a href="https://meow-blossom-haven.summercommences.com/"><b>▶ 在线体验</b></a>
 </p>
 
 # Meow Blossom Haven · 猪猪的喵喵仙境
@@ -65,6 +65,7 @@ python3 -m http.server 8791 --bind 127.0.0.1
 - three.js 固定为 `0.160.0` 版本，每个模块都带子资源完整性（SRI）校验，文件被篡改时浏览器会拒绝加载。
 - 内容安全策略（CSP）限定页面只能从自身、jsDelivr 和 Google Fonts 加载资源。
 - 不会把任何用户输入作为 HTML 写入页面。
+- 部署在 Cloudflare Pages 时，`_headers` 会以 HTTP 响应头下发同样的策略，并额外加上 `frame-ancestors 'none'`（禁止被其他网站嵌入）、HSTS 和 `nosniff`。
 
 ## 开发
 

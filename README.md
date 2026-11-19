@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://summerpapaya.github.io/meow-blossom-haven/"><b>▶ Live demo</b></a>
+  <a href="https://meow-blossom-haven.summercommences.com/"><b>▶ Live demo</b></a>
 </p>
 
 # Meow Blossom Haven
@@ -65,6 +65,7 @@ Recent Chrome, Edge, Safari and Firefox with WebGL 2. The scene lowers its own q
 - three.js is pinned to `0.160.0`, and every module is checked with Subresource Integrity hashes; a modified file is refused by the browser.
 - A Content-Security-Policy limits the page to itself, jsDelivr and Google Fonts.
 - No user input is ever written into the page as HTML.
+- On Cloudflare Pages, `_headers` sends the same policy as real HTTP headers, plus `frame-ancestors 'none'` (no embedding in other sites), HSTS and `nosniff`.
 
 ## Development
 
