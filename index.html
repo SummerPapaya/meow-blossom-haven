@@ -775,8 +775,9 @@ const BOWL = new V3(5.2, 0, 1.0), bowlFront = new V3(4.25, 0, 1.2);
 // mushrooms
 const gillM = std(0xffffff, { map: canvasTex(256, 256, c => { c.fillStyle = '#fff3e6'; c.fillRect(0, 0, 256, 256); c.strokeStyle = 'rgba(214,180,160,.8)'; c.lineWidth = 2; for (let i = 0; i < 72; i++) { const a = i / 72 * PI * 2; c.beginPath(); c.moveTo(128 + Math.cos(a) * 30, 128 + Math.sin(a) * 30); c.lineTo(128 + Math.cos(a) * 128, 128 + Math.sin(a) * 128); c.stroke(); } }), roughness: 1 });
 let lampCapMat;
+const MUSHROOMS = []; // island mushrooms, for floor-level body collision (see floorVox)
 function mushroom(x, z, s, color, isLamp, parent = scene) {
-  const g = new THREE.Group(); g.position.set(x, 0, z); g.scale.setScalar(s); parent.add(g);
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.scale.setScalar(s); parent.add(g); MUSHROOMS.push(g);
   add(g, new THREE.CylinderGeometry(.24, .32, .85, 14), M.cream, 0, .42, 0);
   const capM = soft(color, isLamp ? { emissive: 0xff9a70, emissiveIntensity: 0 } : {});
   const cap = add(g, new THREE.SphereGeometry(.8, 24, 12, 0, PI * 2, 0, PI / 2), capM, 0, .78, 0); cap.scale.y = .8;
@@ -1376,9 +1377,8 @@ function bakeStatics() {
 /* perch collision: before the statics are merged, sample every cat tree's surfaces into a 10 cm voxel set per island.
    While Peach is on a perch, her head / chest / back / hips are tested against it (see perchClear in updateCat). */
 const VOX_C = .1, voxKey = (x, y, z) => ((Math.round(x / VOX_C) + 512) * 1024 + Math.round(y / VOX_C) + 512) * 1024 + Math.round(z / VOX_C) + 512;
-const treeVox = {};
-for (const k in TREE_GROUPS) {
-  const set = new Set(), v = [new V3(), new V3(), new V3()], q = new V3(), nrm = new V3(), _e = new V3(), g = TREE_GROUPS[k]; g.updateMatrixWorld(true);
+function voxelize(g, set) {
+  const v = [new V3(), new V3(), new V3()], q = new V3(), nrm = new V3(), _e = new V3(); g.updateMatrixWorld(true);
   g.traverse(o => {
     if (!o.isMesh || !o.visible || o.material === invisible || o.material === shadowOnly || !o.geometry.attributes.position) return;
     const pos = o.geometry.attributes.position, idx = o.geometry.index, n = idx ? idx.count : pos.count;
@@ -1389,11 +1389,17 @@ for (const k in TREE_GROUPS) {
       const m = Math.max(1, Math.ceil(Math.max(v[0].distanceTo(v[1]), v[1].distanceTo(v[2]), v[2].distanceTo(v[0])) / VOX_C));
       for (let a = 0; a <= m; a++) for (let b = 0; b <= m - a; b++) {
         q.copy(v[0]).multiplyScalar(1 - (a + b) / m).addScaledVector(v[1], a / m).addScaledVector(v[2], b / m); set.add(voxKey(q.x, q.y, q.z));
-        for (let f = 1; f <= 2 && furLen > .02; f++) { const w = q.clone().addScaledVector(nrm, furLen * f / 2); set.add(voxKey(w.x, w.y, w.z)); const w2 = q.clone().addScaledVector(nrm, -furLen * f / 2); set.add(voxKey(w2.x, w2.y, w2.z)); }
+        for (let f = 1; f <= 2 && furLen > .02; f++) for (const sg of [1, -1]) { _e.copy(q).addScaledVector(nrm, sg * furLen * f / 2); set.add(voxKey(_e.x, _e.y, _e.z)); }
       }
     }
   });
-  treeVox[k] = set;
+  return set;
+}
+const treeVox = {}, floorVox = {}; // perches: the tree; walking on the ground: the tree plus that island's mushrooms
+for (const k in ISL) {
+  treeVox[k] = TREE_GROUPS[k] ? voxelize(TREE_GROUPS[k], new Set()) : new Set();
+  floorVox[k] = new Set(treeVox[k]);
+  for (const g of MUSHROOMS) { let a = g.parent; while (a && a !== ISL[k]) a = a.parent; if (a) voxelize(g, floorVox[k]); }
 }
 function voxHit(set, p, r, minY = -1e9) {
   const R = Math.ceil(r / VOX_C), cx = Math.round(p.x / VOX_C), cy = Math.round(p.y / VOX_C), cz = Math.round(p.z / VOX_C), rr = (r / VOX_C) ** 2, lo = Math.round(minY / VOX_C) - cy;
@@ -1619,6 +1625,7 @@ function nextStep() {
   cat.step = cat.script.shift() || null;
   if (cat.step) cat.step.t = 0; else cat.idleT = cat.loc === 'floor' ? rnd(1.5, 4) : rnd(3, 7);
 }
+const _wHead = new V3(0, 0, .05), _wMuz = new V3(0, -.07, .33), _wChin = new V3(0, -.15, .24);
 const perchPts = [new V3(0, .4, .32), new V3(0, .52, 0), new V3(0, .36, -.34), new V3(0, .3, -.52)], _pv = new V3(), _hl = new V3(), _hu = new V3();
 function perchClash(yaw) { // how many body points (head, chest, back, hips, rump) would sit inside the cat tree at this heading
   const set = treeVox[env.island]; if (!set) return 0; const c = Math.cos(yaw), s = Math.sin(yaw), o = cat.root.position, floor = o.y + .18; let n = 0; // the perch she stands on doesn't count
@@ -1634,6 +1641,20 @@ function perchClear(dt) { // on a perch: if head or body would poke into the tre
   for (const d of [.35, -.35, .7, -.7, 1.05, -1.05, 1.4, -1.4, 1.75, -1.75, 2.1, -2.1, 2.6, -2.6, PI]) { const n = perchClash(cat.yaw + d); if (!n) { best = d; break; } if (n < fewest) { fewest = n; least = d; } }
   if (best === null && s && s.type === 'wait' && s.pose === 'stand') { finish(s); return; } // boxed in (e.g. under an overhang): don't stand there, carry on to the next jump
   cat.yaw += (best ?? least) * Math.min(1, dt * 14);
+}
+function floorClash(o) { // on the ground: would head, muzzle, chest, back or hips poke into a cat tree tier or a mushroom cap?
+  const set = floorVox[env.island]; if (!set) return 0; const c = Math.cos(cat.yaw), s = Math.sin(cat.yaw); let n = 0;
+  _hu.copy(_hl).y += .12;
+  for (const [pt, r] of [[_hl, .17], [_hu, .15]].concat(perchPts.map(q => [q, .15]))) { _pv.set(o.x + pt.x * c + pt.z * s, o.y + pt.y, o.z - pt.x * s + pt.z * c); if (voxHit(set, _pv, r, o.y + .22)) n++; }
+  return n;
+}
+const _fp = new V3();
+function floorClear() { // slide out of furniture: try small steps around and take the first clear one (or the least-bad)
+  cat.root.worldToLocal(cat.head.getWorldPosition(_hl));
+  const pos = cat.root.position, cur = floorClash(pos); if (!cur) return;
+  let best = null, fewest = cur; // only ever move to a strictly better spot, so she never jitters in place
+  for (const st of [.06, .12, .2]) { for (let i = 0; i < 12; i++) { const a = i / 12 * PI * 2; _fp.set(pos.x + Math.sin(a) * st, pos.y, pos.z + Math.cos(a) * st); const n = floorClash(_fp); if (n < fewest) { fewest = n; best = _fp.clone(); } if (!n) break; } if (!fewest) break; }
+  if (best) { pos.x = best.x; pos.z = best.z; }
 }
 function finish(s) { if (s.loc) cat.loc = s.loc; cat.step = null; }
 const headPos = () => cat.head.getWorldPosition(new V3());
@@ -1714,7 +1735,7 @@ function updateCat(dt, t) {
   const P = cat.P, T = POSES[cat.pose], perch = cat.loc !== 'floor' && cat.loc !== 'tunnel'; // on a perch or in a bed the tail curls round instead of hanging down through it
   for (const k in T) P[k] = damp(P[k], k === 'tailRaise' && perch ? Math.max(T[k], .12) : k === 'tailYaw' && perch ? T[k] + .35 : T[k], 7, dt);
   cat.air = damp(cat.air, cat.airT, 12, dt); cat.walkAmt = damp(cat.walkAmt, cat.moving, 9, dt);
-  if (String(cat.loc).startsWith('tree') && cat.air < .3) perchClear(dt);
+  if (String(cat.loc).startsWith('tree') && cat.air < .3) perchClear(dt); else if (cat.loc === 'floor' && cat.air < .3 && cat.pose !== 'sleep') floorClear();
   cat.root.rotation.y = cat.yaw;
   const asleep = cat.pose === 'sleep', pitch = P.pitch + cat.jumpPitch * cat.air;
   cat.pivot.position.y = P.hipY + Math.abs(Math.sin(cat.phase)) * .025 * cat.walkAmt;
@@ -1915,13 +1936,16 @@ function updateToys(dt, t) {
   }
   // wand spring
   wand.v.x += (-40 * wand.a.x - 2.2 * wand.v.x) * dt; wand.v.y += (-40 * wand.a.y - 2.2 * wand.v.y) * dt; wand.a.addScaledVector(wand.v, dt);
-  { // keep the pole (and the feathers hanging below its tip) out of Peach's head: nudge the spring away when they would touch
-    const hp = cat.head.getWorldPosition(_pv), lean = (ax, ay) => new V3(-Math.sin(ay), Math.cos(ay) * Math.cos(ax), Math.cos(ay) * Math.sin(ax)); // pole direction for rotation (ax, 0, ay)
-    for (let it = 0; it < 3; it++) {
-      const dir = lean(wand.a.x, wand.a.y), rel = hp.clone().sub(WAND), h = clamp(rel.dot(dir), .1, 1.7 + .3), cp = dir.clone().multiplyScalar(Math.min(h, 1.7)); if (h > 1.7) cp.y -= h - 1.7;
-      const away = rel.clone().sub(cp); away.y = 0; const d = away.length(), need = .36 - d; if (need <= 0) break;
-      const k = need / Math.max(.6, Math.min(h, 1.7)); if (d > 1e-4) away.multiplyScalar(1 / d); else away.set(1, 0, 0);
-      wand.a.x -= away.z * k; wand.a.y += away.x * k; wand.v.multiplyScalar(.6);
+  { // keep the pole (and the feathers hanging below its tip) out of Peach's head, muzzle and chin: nudge the spring away when they would touch
+    const lean = (ax, ay) => new V3(-Math.sin(ay), Math.cos(ay) * Math.cos(ax), Math.cos(ay) * Math.sin(ax)); // pole direction for rotation (ax, 0, ay)
+    for (const [lp, clr] of [[_wHead, .3], [_wMuz, .2], [_wChin, .2]]) {
+      const hp = cat.head.localToWorld(_pv.copy(lp));
+      for (let it = 0; it < 3; it++) {
+        const dir = lean(wand.a.x, wand.a.y), rel = hp.clone().sub(WAND), h = clamp(rel.dot(dir), .1, 1.7 + .3), cp = dir.clone().multiplyScalar(Math.min(h, 1.7)); if (h > 1.7) cp.y -= h - 1.7;
+        const away = rel.clone().sub(cp); away.y = 0; const d = away.length(), need = clr - d; if (need <= 0) break;
+        const k = need / Math.max(.6, Math.min(h, 1.7)); if (d > 1e-4) away.multiplyScalar(1 / d); else away.set(1, 0, 0);
+        wand.a.x -= away.z * k; wand.a.y += away.x * k; wand.v.multiplyScalar(.6);
+      }
     }
   }
   wand.g.rotation.set(wand.a.x + Math.sin(t * 1.1) * .03, 0, wand.a.y); wand.tip.rotation.set(-wand.a.x * 1.6, t * .5, -wand.a.y * 1.6);
@@ -2007,7 +2031,7 @@ document.addEventListener('visibilitychange', () => {
 renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; const st = $('#start'); AU.startWasShown = !!st && st.style.display !== 'none';
   showFallback('画面暂时中断了（图形资源被系统回收），正在等待恢复。', 'The 3D view was interrupted (graphics memory was reclaimed). Waiting for it to come back.', true); });
 renderer.domElement.addEventListener('webglcontextrestored', () => { lost = false; const fb = $('#fallback'); if (fb) fb.style.display = 'none'; const st = $('#start'); if (st && AU.startWasShown) st.style.display = ''; renderer.shadowMap.needsUpdate = true; resume(); });
-if (new URLSearchParams(location.search).has('debug')) window.peach = { perchClash, treeVox, THREE, renderer, scene, composer, scrub, perf, ISL, obstacles, cat, command, setEnv, setIsland, travel, env, camera, controls, AU, home, tick: (n = 60) => { for (let i = 0; i < n; i++) step(1 / 30); renderer.shadowMap.needsUpdate = true; composer.render(); }, bakeStat };
+if (new URLSearchParams(location.search).has('debug')) window.peach = { perchClash, floorClash, treeVox, floorVox, THREE, renderer, scene, composer, scrub, perf, ISL, obstacles, cat, command, setEnv, setIsland, travel, env, camera, controls, AU, home, tick: (n = 60) => { for (let i = 0; i < n; i++) step(1 / 30); renderer.shadowMap.needsUpdate = true; composer.render(); }, bakeStat };
 (async () => { // compile all shaders up front (parallel where the GPU driver allows) so neither the first frame nor an island switch stalls
   const t0 = performance.now(); step(1 / 30); // first step builds the environment map, so materials compile in their final form
   renderer.setRenderTarget(composer.renderTarget1); // compile for the composer's off-screen target: that is where the scene is really drawn (no tone mapping there)
