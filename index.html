@@ -493,8 +493,10 @@ let waterTex, domeMat;
         float w2=.5+.5*sin(-ang*2.+vP.y*.26-uTime*.28+1.7+sin(ang*3.+uTime*.15)*.8);
         float ripple=pow(w1,7.)*.65+pow(w2,9.)*.45;
         float glow=pow(.5+.5*sin(vP.x*.17+uTime*.21)*sin(vP.y*.19-uTime*.16+vP.z*.13),5.);
-        float flow=ripple*.075+glow*.04;
-        col=mix(col,vec3(1.,.95,1.),ripple*.3);
+        // weighted toward the rim: where you look straight through the glass it stays clear (no veil over the scene)
+        float rimW=pow(clamp(1.-abs(dot(normalize(vN),V)),0.,1.),1.6);
+        float flow=(ripple*.075+glow*.035)*(.08+.92*rimW);
+        col=mix(col,vec3(1.,.95,1.),ripple*.3*rimW);
         float base=smoothstep(1.6,0.,vP.y)*.3;
         float al=(f*.3+flow*(.7+.5*uNight)+hex*.8+base*.22+.003)*(.3+.2*uNight);
         gl_FragColor=vec4(col*(1.+uNight*.35),al); }` });
