@@ -632,7 +632,7 @@ function fx(tex, p, vel, life = 1.6, size = .35) {
 }
 
 /* ───────────── giant flower cat tree ───────────── */
-const TREE = new V3(-3.7, 0, -2.4);
+const TREE = new V3(-3.7, 0, -2.4), TREE_GROUPS = {}; // each island's cat tree, for perch collision (see treeVox)
 const treeLocal = { P1: new V3(1.25, 1.5, .55), P2: new V3(-1.2, 2.75, .4), P3: new V3(0, 4.5, 0) };
 const tree = new THREE.Group(); tree.position.copy(TREE); scene.add(tree);
 const swingers = []; // {g, a, v, k}
@@ -689,7 +689,7 @@ function makeFlower(r) { // plush toy flower for the cat tree
   }
 })();
 
-{ const sk = new THREE.Group(); sk.position.copy(TREE); ISL.blossom.add(sk); for (const c of [...tree.children]) if (!(c.isMesh && c.material === invisible)) sk.add(c); }
+{ const sk = new THREE.Group(); sk.position.copy(TREE); ISL.blossom.add(sk); TREE_GROUPS.blossom = sk; for (const c of [...tree.children]) if (!(c.isMesh && c.material === invisible)) sk.add(c); }
 
 /* ───────────── bed ───────────── */
 const BED = new V3(3.5, 0, -2.3), bedC = new V3(3.5, .38, -2.3), bedFront = new V3(2.25, 0, -.85);
@@ -1016,7 +1016,7 @@ function cottonGeo(sc, y = -.3, w = 1.05, d = .85) { // soft, lumpy cotton-wool 
 }
 (function cloudSkin() { // moonlit cloud isle: everything floats and is made of cotton-soft cloud
   const G = ISL.cloud, cot = (geo, k = 0) => { const m = new THREE.Mesh(geo, COTTON[k % 5]); m.castShadow = true; m.receiveShadow = false; return m; };
-  const tg = grp(G, TREE);
+  const tg = grp(G, TREE); TREE_GROUPS.cloud = tg;
   [[treeLocal.P1, 1, 1], [treeLocal.P2, 1, 2], [treeLocal.P3, 1.3, 0]].forEach(([P, sc, k], i) => {
     const c = cot(cottonGeo(sc, -.33), k); c.position.copy(P); tg.add(c);
     for (let j = 0; j < 3; j++) { const a = i * 2 + j * 2.1, L = .5 + j * .22, st = add(tg, starGeo, M.gold, P.x + Math.cos(a) * .7 * sc, P.y - .7 - L, P.z + Math.sin(a) * .6 * sc); st.scale.setScalar(.1); st.castShadow = false; tg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new V3(st.position.x, P.y - .55, st.position.z), st.position.clone()]), new THREE.LineBasicMaterial({ color: 0xfff0f5 }))); }
@@ -1044,7 +1044,7 @@ function cottonGeo(sc, y = -.3, w = 1.05, d = .85) { // soft, lumpy cotton-wool 
 })();
 
 (function candySkin() { // candy tea-party: dessert-stand cat tree, cupcake bed, swiss-roll tunnel
-  const G = ISL.candy, { P1, P2, P3 } = treeLocal, tg = grp(G, TREE);
+  const G = ISL.candy, { P1, P2, P3 } = treeLocal, tg = grp(G, TREE); TREE_GROUPS.candy = tg;
   // cotton candy: big fluffy puffs drifting in the sky, some still on their paper cones
   const ccM = [0xffb8d9, 0xbfe0ff, 0xe3cbff, 0xfff0b8, 0xffcfe6].map(c => new THREE.MeshPhysicalMaterial({ color: c, roughness: 1, sheen: 1, sheenRoughness: .9, sheenColor: new THREE.Color(0xffffff), emissive: c, emissiveIntensity: .22 }));
   const coneM = std(0xfff4e6, { map: (() => { const t = candyTex.clone(); t.repeat.set(4, 1); t.needsUpdate = true; return t; })(), roughness: .7 });
@@ -1134,7 +1134,7 @@ function makeJelly(sc, c) {
   const pearl = new THREE.MeshPhysicalMaterial({ color: 0xffe9f2, roughness: .25, iridescence: 1, iridescenceIOR: 1.5, sheen: 1, sheenColor: new THREE.Color(0xbfe6ff), side: THREE.DoubleSide });
   const corals = [0xff8f9f, 0xffb37a, 0xc79bff, 0xff7fbf, 0x7fe0d0].map(c => soft(c, { roughness: .7 }));
   // coral cat-tree with scallop-shell platforms and a sea-anemone crown
-  const tg = grp(G, TREE), { P1, P2, P3 } = treeLocal;
+  const tg = grp(G, TREE), { P1, P2, P3 } = treeLocal; TREE_GROUPS.ocean = tg;
   add(tg, ell(1.0, .25, 1.0), corals[2], 0, .12, 0);
   for (const [P, k] of [[P1, 0], [P2, 1], [P3, 3]]) add(tg, new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new V3(0, .1, 0), new V3(P.x * .2 + .15, P.y * .45, P.z * .2), new V3(P.x * .85, P.y - .9, P.z * .85), new V3(P.x * .95, P.y - .3, P.z * .95)]), 30, .2 - k * .02, 10), corals[k]);
   for (let i = 0; i < 10; i++) { const y = .6 + i * .27, a = i * 2.4, L = .5 + (i % 3) * .2, tip = new V3(Math.cos(a) * L, y + L * .9, Math.sin(a) * L); add(tg, new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new V3(Math.cos(a) * .1, y, Math.sin(a) * .1), new V3(Math.cos(a) * L * .7, y + L * .3, Math.sin(a) * L * .7), tip]), 8, .055, 6), corals[i % 4]); add(tg, new THREE.SphereGeometry(.085, 8, 6), corals[i % 4], tip.x, tip.y, tip.z); }
@@ -1226,7 +1226,7 @@ const FS = { leaf: [], ground: null, fern: null }, FOREST_SEASON = {
   for (const sgn of [-1, 1]) add(T, new THREE.CylinderGeometry(.035, .035, HY + .4, 6), std(0xcdb38a), sgn * .32 + 1.4, HY / 2, 3.1).rotation.x = .1; for (let k = 0; k < 11; k++) add(T, new THREE.CylinderGeometry(.03, .03, .64, 6), woodM, 1.4, .4 + k * .46, 3.37 - k * .045).rotation.z = PI / 2;
   add(T, new THREE.SphereGeometry(.16, 10, 8), glowMat(0xffd76a), -1.5, HY + 1.6, 2.5).castShadow = false;
   // cat tree (ref: plush tree-trunk tower): brown plush trunk with hollows, mossy plush decks, side cabin, pom-poms
-  const tg = grp(G, TREE), { P1, P2, P3 } = treeLocal, GRN = 0x5fb548, BRN = 0xb5733c, hole = std(0x3a2416, { roughness: 1 });
+  const tg = grp(G, TREE); TREE_GROUPS.forest = tg; const { P1, P2, P3 } = treeLocal, GRN = 0x5fb548, BRN = 0xb5733c, hole = std(0x3a2416, { roughness: 1 });
   const TH = P3.y - .28, trG = new THREE.CylinderGeometry(.62, .8, TH, 30, 8, true); trG.translate(0, TH / 2, 0); tg.add(plush(trG, BRN, { len: .045, density: 80 }));
   tg.add(plush(ell(1.7, .08, 1.7, 0, .05, 0), GRN, { len: .1, density: 34, shadow: false }));
   for (const [y, a] of [[.6, .3], [1.75, 2.3], [2.9, -.8], [3.7, 1.1]]) { const rr = .8 - (y / TH) * .18 + .06, h = add(tg, new THREE.CircleGeometry(.3, 22), hole, Math.sin(a) * rr, y, Math.cos(a) * rr); h.rotation.y = a; h.castShadow = false; const rg2 = withFur(new THREE.TorusGeometry(.33, .06, 8, 24)); const rm = plush(rg2, 0xc98548, { len: .035, density: 80, shadow: false }); rm.position.copy(h.position); rm.rotation.y = a; tg.add(rm); }
@@ -1372,6 +1372,34 @@ function bakeStatics() {
     for (const { m, c, r, list } of groups.values()) { const mesh = new THREE.Mesh(list.length > 1 ? mergeGeometries(list) : list[0], m); mesh.castShadow = c; mesh.receiveShadow = r; G.add(mesh); stat.after++; }
   }
   return stat;
+}
+/* perch collision: before the statics are merged, sample every cat tree's surfaces into a 10 cm voxel set per island.
+   While Peach is on a perch, her head / chest / back / hips are tested against it (see perchClear in updateCat). */
+const VOX_C = .1, voxKey = (x, y, z) => ((Math.round(x / VOX_C) + 512) * 1024 + Math.round(y / VOX_C) + 512) * 1024 + Math.round(z / VOX_C) + 512;
+const treeVox = {};
+for (const k in TREE_GROUPS) {
+  const set = new Set(), v = [new V3(), new V3(), new V3()], q = new V3(), nrm = new V3(), _e = new V3(), g = TREE_GROUPS[k]; g.updateMatrixWorld(true);
+  g.traverse(o => {
+    if (!o.isMesh || !o.visible || o.material === invisible || o.material === shadowOnly || !o.geometry.attributes.position) return;
+    const pos = o.geometry.attributes.position, idx = o.geometry.index, n = idx ? idx.count : pos.count;
+    const u = o.material.uniforms, furLen = u && u.uLen ? u.uLen.value * o.matrixWorld.getMaxScaleOnAxis() : 0; // plush: the fur reaches past the base shape
+    for (let i = 0; i + 2 < n; i += 3) {
+      for (let j = 0; j < 3; j++) v[j].fromBufferAttribute(pos, idx ? idx.getX(i + j) : i + j).applyMatrix4(o.matrixWorld);
+      nrm.subVectors(v[1], v[0]).cross(_e.subVectors(v[2], v[0])).normalize();
+      const m = Math.max(1, Math.ceil(Math.max(v[0].distanceTo(v[1]), v[1].distanceTo(v[2]), v[2].distanceTo(v[0])) / VOX_C));
+      for (let a = 0; a <= m; a++) for (let b = 0; b <= m - a; b++) {
+        q.copy(v[0]).multiplyScalar(1 - (a + b) / m).addScaledVector(v[1], a / m).addScaledVector(v[2], b / m); set.add(voxKey(q.x, q.y, q.z));
+        for (let f = 1; f <= 2 && furLen > .02; f++) { const w = q.clone().addScaledVector(nrm, furLen * f / 2); set.add(voxKey(w.x, w.y, w.z)); const w2 = q.clone().addScaledVector(nrm, -furLen * f / 2); set.add(voxKey(w2.x, w2.y, w2.z)); }
+      }
+    }
+  });
+  treeVox[k] = set;
+}
+function voxHit(set, p, r, minY = -1e9) {
+  const R = Math.ceil(r / VOX_C), cx = Math.round(p.x / VOX_C), cy = Math.round(p.y / VOX_C), cz = Math.round(p.z / VOX_C), rr = (r / VOX_C) ** 2, lo = Math.round(minY / VOX_C) - cy;
+  for (let dx = -R; dx <= R; dx++) for (let dy = Math.max(-R, lo); dy <= R; dy++) for (let dz = -R; dz <= R; dz++)
+    if (dx * dx + dy * dy + dz * dz <= rr && set.has(((cx + dx + 512) * 1024 + cy + dy + 512) * 1024 + cz + dz + 512)) return true;
+  return false;
 }
 const bakeStat = bakeStatics();
 { const an = Math.min(8, renderer.capabilities.getMaxAnisotropy()); // sharper floors, rugs and petals at grazing angles
@@ -1591,6 +1619,22 @@ function nextStep() {
   cat.step = cat.script.shift() || null;
   if (cat.step) cat.step.t = 0; else cat.idleT = cat.loc === 'floor' ? rnd(1.5, 4) : rnd(3, 7);
 }
+const perchPts = [new V3(0, .4, .32), new V3(0, .52, 0), new V3(0, .36, -.34), new V3(0, .3, -.52)], _pv = new V3(), _hl = new V3(), _hu = new V3();
+function perchClash(yaw) { // how many body points (head, chest, back, hips, rump) would sit inside the cat tree at this heading
+  const set = treeVox[env.island]; if (!set) return 0; const c = Math.cos(yaw), s = Math.sin(yaw), o = cat.root.position, floor = o.y + .18; let n = 0; // the perch she stands on doesn't count
+  _hu.copy(_hl).y += .12;
+  for (const [pt, r] of [[_hl, .17], [_hu, .16]].concat(perchPts.map(q => [q, .15]))) { _pv.set(o.x + pt.x * c + pt.z * s, o.y + pt.y, o.z - pt.x * s + pt.z * c); if (voxHit(set, _pv, r, floor)) n++; }
+  return n;
+}
+function perchClear(dt) { // on a perch: if head or body would poke into the tree, turn to the nearest clear heading (or jump right away)
+  cat.root.worldToLocal(cat.head.getWorldPosition(_hl));
+  if (!perchClash(cat.yaw)) return;
+  const s = cat.step; if (s && s.type === 'jump' && s.t < .3) { s.t = .3; return; } // crouching to jump with the head in a branch: just jump
+  let best = null, fewest = 99, least = 0;
+  for (const d of [.35, -.35, .7, -.7, 1.05, -1.05, 1.4, -1.4, 1.75, -1.75, 2.1, -2.1, 2.6, -2.6, PI]) { const n = perchClash(cat.yaw + d); if (!n) { best = d; break; } if (n < fewest) { fewest = n; least = d; } }
+  if (best === null && s && s.type === 'wait' && s.pose === 'stand') { finish(s); return; } // boxed in (e.g. under an overhang): don't stand there, carry on to the next jump
+  cat.yaw += (best ?? least) * Math.min(1, dt * 14);
+}
 function finish(s) { if (s.loc) cat.loc = s.loc; cat.step = null; }
 const headPos = () => cat.head.getWorldPosition(new V3());
 function onPet() {
@@ -1670,6 +1714,7 @@ function updateCat(dt, t) {
   const P = cat.P, T = POSES[cat.pose], perch = cat.loc !== 'floor' && cat.loc !== 'tunnel'; // on a perch or in a bed the tail curls round instead of hanging down through it
   for (const k in T) P[k] = damp(P[k], k === 'tailRaise' && perch ? Math.max(T[k], .12) : k === 'tailYaw' && perch ? T[k] + .35 : T[k], 7, dt);
   cat.air = damp(cat.air, cat.airT, 12, dt); cat.walkAmt = damp(cat.walkAmt, cat.moving, 9, dt);
+  if (String(cat.loc).startsWith('tree') && cat.air < .3) perchClear(dt);
   cat.root.rotation.y = cat.yaw;
   const asleep = cat.pose === 'sleep', pitch = P.pitch + cat.jumpPitch * cat.air;
   cat.pivot.position.y = P.hipY + Math.abs(Math.sin(cat.phase)) * .025 * cat.walkAmt;
@@ -1682,7 +1727,7 @@ function updateCat(dt, t) {
   { const want = env.time === 'night' ? 'round' : env.time === 'day' ? 'slit' : 'oval'; if (cat.pupil !== want) { cat.pupil = want; cat.eyeMat.map = cat.eyeMat.emissiveMap = cat.eyeTexs[want]; cat.blink = .2; } } // pupils narrow in daylight, widen at night (swapped during a blink)
   cat.blinkT -= dt; if (cat.blinkT < 0) { cat.blink = .14; cat.blinkT = rnd(2.5, 6); } cat.blink -= dt;
   cat.eye = damp(cat.eye, asleep ? .05 : cat.happy > 0 ? .16 : cat.blink > 0 ? .05 : 1, 22, dt);
-  for (const e of cat.eyes) e.scale.y = 1.02 * Math.max(.06, cat.eye);
+  for (const e of cat.eyes) { e.scale.y = 1.02 * Math.max(.06, cat.eye); e.children[0].visible = cat.eye > .24; } // nearly shut: show only the dark lid line, not a sliver of iris
   let ly = 0, lp = 0;
   if (!asleep && !cat.moving && !cat.groom && cat.pose !== 'eat') { const c = cat.root.worldToLocal(camera.position.clone()); const a = Math.atan2(c.x, c.z - 1); if (Math.abs(a) < 1.5) { ly = clamp(a * .75, -.85, .85); lp = -.12; } }
   cat.lookYaw = damp(cat.lookYaw, ly, 4, dt); cat.lookPitch = damp(cat.lookPitch, lp, 4, dt);
@@ -1870,6 +1915,15 @@ function updateToys(dt, t) {
   }
   // wand spring
   wand.v.x += (-40 * wand.a.x - 2.2 * wand.v.x) * dt; wand.v.y += (-40 * wand.a.y - 2.2 * wand.v.y) * dt; wand.a.addScaledVector(wand.v, dt);
+  { // keep the pole (and the feathers hanging below its tip) out of Peach's head: nudge the spring away when they would touch
+    const hp = cat.head.getWorldPosition(_pv), lean = (ax, ay) => new V3(-Math.sin(ay), Math.cos(ay) * Math.cos(ax), Math.cos(ay) * Math.sin(ax)); // pole direction for rotation (ax, 0, ay)
+    for (let it = 0; it < 3; it++) {
+      const dir = lean(wand.a.x, wand.a.y), rel = hp.clone().sub(WAND), h = clamp(rel.dot(dir), .1, 1.7 + .3), cp = dir.clone().multiplyScalar(Math.min(h, 1.7)); if (h > 1.7) cp.y -= h - 1.7;
+      const away = rel.clone().sub(cp); away.y = 0; const d = away.length(), need = .36 - d; if (need <= 0) break;
+      const k = need / Math.max(.6, Math.min(h, 1.7)); if (d > 1e-4) away.multiplyScalar(1 / d); else away.set(1, 0, 0);
+      wand.a.x -= away.z * k; wand.a.y += away.x * k; wand.v.multiplyScalar(.6);
+    }
+  }
   wand.g.rotation.set(wand.a.x + Math.sin(t * 1.1) * .03, 0, wand.a.y); wand.tip.rotation.set(-wand.a.x * 1.6, t * .5, -wand.a.y * 1.6);
   // fish hop
   if (fish.vy !== 0 || fish.y > 0) { fish.vy -= 9 * dt; fish.y += fish.vy * dt; fish.spin += dt * 9; if (fish.y <= 0) { fish.y = 0; fish.vy = 0; fish.spin = 0; } fish.b.position.y = .16 + fish.y; fish.b.rotation.set(fish.spin, fish.spin * .5, 0); }
@@ -1953,7 +2007,7 @@ document.addEventListener('visibilitychange', () => {
 renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; const st = $('#start'); AU.startWasShown = !!st && st.style.display !== 'none';
   showFallback('画面暂时中断了（图形资源被系统回收），正在等待恢复。', 'The 3D view was interrupted (graphics memory was reclaimed). Waiting for it to come back.', true); });
 renderer.domElement.addEventListener('webglcontextrestored', () => { lost = false; const fb = $('#fallback'); if (fb) fb.style.display = 'none'; const st = $('#start'); if (st && AU.startWasShown) st.style.display = ''; renderer.shadowMap.needsUpdate = true; resume(); });
-if (new URLSearchParams(location.search).has('debug')) window.peach = { THREE, renderer, scene, composer, scrub, perf, ISL, obstacles, cat, command, setEnv, setIsland, travel, env, camera, controls, AU, home, tick: (n = 60) => { for (let i = 0; i < n; i++) step(1 / 30); renderer.shadowMap.needsUpdate = true; composer.render(); }, bakeStat };
+if (new URLSearchParams(location.search).has('debug')) window.peach = { perchClash, treeVox, THREE, renderer, scene, composer, scrub, perf, ISL, obstacles, cat, command, setEnv, setIsland, travel, env, camera, controls, AU, home, tick: (n = 60) => { for (let i = 0; i < n; i++) step(1 / 30); renderer.shadowMap.needsUpdate = true; composer.render(); }, bakeStat };
 (async () => { // compile all shaders up front (parallel where the GPU driver allows) so neither the first frame nor an island switch stalls
   const t0 = performance.now(); step(1 / 30); // first step builds the environment map, so materials compile in their final form
   renderer.setRenderTarget(composer.renderTarget1); // compile for the composer's off-screen target: that is where the scene is really drawn (no tone mapping there)
