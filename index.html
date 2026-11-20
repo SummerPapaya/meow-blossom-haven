@@ -1938,7 +1938,7 @@ function updateToys(dt, t) {
   wand.v.x += (-40 * wand.a.x - 2.2 * wand.v.x) * dt; wand.v.y += (-40 * wand.a.y - 2.2 * wand.v.y) * dt; wand.a.addScaledVector(wand.v, dt);
   { // keep the pole (and the feathers hanging below its tip) out of Peach's head, muzzle and chin: nudge the spring away when they would touch
     const lean = (ax, ay) => new V3(-Math.sin(ay), Math.cos(ay) * Math.cos(ax), Math.cos(ay) * Math.sin(ax)); // pole direction for rotation (ax, 0, ay)
-    for (const [lp, clr] of [[_wHead, .3], [_wMuz, .2], [_wChin, .2]]) {
+    for (const [lp, clr] of [[_wHead, .34], [_wMuz, .28], [_wChin, .26]]) {
       const hp = cat.head.localToWorld(_pv.copy(lp));
       for (let it = 0; it < 3; it++) {
         const dir = lean(wand.a.x, wand.a.y), rel = hp.clone().sub(WAND), h = clamp(rel.dot(dir), .1, 1.7 + .3), cp = dir.clone().multiplyScalar(Math.min(h, 1.7)); if (h > 1.7) cp.y -= h - 1.7;
