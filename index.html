@@ -485,10 +485,9 @@ let waterTex, domeMat;
       void main(){ vec3 V=normalize(cameraPosition-vW); float f=pow(clamp(1.-abs(dot(normalize(vN),V)),0.,1.),2.4);
         vec3 a=vec3(1.,.74,.92), b=vec3(.64,.88,1.), c=vec3(1.,.96,.74);
         vec3 col=mix(a,b,.5+.5*sin(f*5.+vP.y*.35+uTime*.5)); col=mix(col,c,.35+.35*sin(vP.x*.3+vP.z*.22+uTime*.3));
-        float band=smoothstep(.965,1.,sin(vP.y*1.15-uTime*.55))*.12;
         float hex=smoothstep(.92,1.,sin(vP.x*1.6+uTime*.2)*sin(vP.z*1.6-uTime*.15)*sin(vP.y*1.6))*.05;
         float base=smoothstep(1.6,0.,vP.y)*.3;
-        float al=(f*.3+band*.6+hex*.8+base*.22+.003)*(.3+.2*uNight);
+        float al=(f*.3+hex*.8+base*.22+.003)*(.3+.2*uNight);
         gl_FragColor=vec4(col*(1.+uNight*.35),al); }` });
   // crystal-ball barrier: a sphere whose centre floats above the meadow, so it bulges past the rim and closes in a round top;
   // it meets the island exactly at the rim ring (radius IR + .5). It encloses the old egg-shaped dome everywhere, so nothing new pokes through.
