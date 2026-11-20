@@ -632,7 +632,7 @@ function fx(tex, p, vel, life = 1.6, size = .35) {
 }
 
 /* ───────────── giant flower cat tree ───────────── */
-const TREE = new V3(-3.7, 0, -2.4), TREE_GROUPS = {}; // each island's cat tree, for perch collision (see treeVox)
+const TREE = new V3(-3.7, 0, -2.4), TREE_GROUPS = {}, BED_GROUPS = {}; // each island's cat tree, for perch collision (see treeVox)
 const treeLocal = { P1: new V3(1.25, 1.5, .55), P2: new V3(-1.2, 2.75, .4), P3: new V3(0, 4.5, 0) };
 const tree = new THREE.Group(); tree.position.copy(TREE); scene.add(tree);
 const swingers = []; // {g, a, v, k}
@@ -992,7 +992,7 @@ const crescentGeo = (() => { const cs = new THREE.Shape(); cs.absarc(0, 0, 1, .9
 const tubeRings = (G, m, n = 2, r = .82, t = .09) => { for (let i = 0; i < n; i++) { const u = n === 1 ? 0 : i / (n - 1), o = add(G, new THREE.TorusGeometry(r, t, 10, 32), m); o.position.copy(tunCurve.getPoint(u)); o.lookAt(o.position.clone().add(tunCurve.getTangent(u))); } };
 
 (function blossomSkin() { // meadow: a plush peach-shaped cat cave the cat walks into
-  const G = ISL.blossom, h = grp(G, BED, bedYaw), OY = 1.0, OR = .9;
+  const G = ISL.blossom, h = grp(G, BED, bedYaw), OY = 1.0, OR = .9; BED_GROUPS.blossom = h;
   const prof = new THREE.SplineCurve([[0, 0], [.95, .02], [1.5, .55], [1.62, 1.15], [1.42, 1.85], [.9, 2.45], [.3, 2.82], [0, 2.95]].map(q => new THREE.Vector2(q[0], q[1]))).getPoints(30);
   const nu = 56, nv = prof.length, pos = [], idx = [];
   for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { const a = i / nu * PI * 2 + PI, k = 1 - .15 * Math.exp(-Math.pow(Math.sin(a) * 7.5, 2)) * Math.min(1, prof[j].y / .7) * (.55 + .45 * prof[j].y / 2.95); pos.push(Math.sin(a) * prof[j].x * k, prof[j].y, Math.cos(a) * prof[j].x * k); }
@@ -1023,7 +1023,7 @@ function cottonGeo(sc, y = -.3, w = 1.05, d = .85) { // soft, lumpy cotton-wool 
     for (let j = 0; j < 3; j++) { const a = i * 2 + j * 2.1, L = .5 + j * .22, st = add(tg, starGeo, M.gold, P.x + Math.cos(a) * .7 * sc, P.y - .7 - L, P.z + Math.sin(a) * .6 * sc); st.scale.setScalar(.1); st.castShadow = false; tg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new V3(st.position.x, P.y - .55, st.position.z), st.position.clone()]), new THREE.LineBasicMaterial({ color: 0xfff0f5 }))); }
   });
   for (let k = 0; k < 7; k++) { const u = k / 6, st = add(tg, starGeo, bulbMats[k % 5], 2.4 - u * 1.2, .35 + u * .9, 1.9 - u * 1.3); st.scale.setScalar(.09 + u * .05); st.castShadow = false; }
-  const bgp = grp(G, BED); bgp.add(cot(cottonGeo(1.3, .75, 1.05, .95), 1));
+  const bgp = grp(G, BED); BED_GROUPS.cloud = bgp; bgp.add(cot(cottonGeo(1.3, .75, 1.05, .95), 1));
   for (const [x, y, z, sc, k] of [[-.9, .25, .5, .45, 2], [.8, .2, -.6, .4, 3], [.2, .15, .9, .32, 0]]) bgp.add(cot(ell(sc, sc * .7, sc, x, y, z, 1, 14, 10), k));
   const mo = add(bgp, crescentGeo, M.moon, -.5, 2.15, -1.05); mo.scale.setScalar(1.15); mo.rotation.set(0, .5, .35); mo.castShadow = false;
   // cotton tunnel: smooth tube wrapped in puffs
@@ -1063,7 +1063,7 @@ function cottonGeo(sc, y = -.3, w = 1.05, d = .85) { // soft, lumpy cotton-wool 
   add(tg, new THREE.CylinderGeometry(1.32, 1.32, .55, 40), soft(0xffe3b8, { roughness: .7 }), 0, P3.y - .32, 0); add(tg, ell(1.36, .1, 1.36), soft(0xffb3cf, { roughness: .4 }), 0, P3.y - .05, 0);
   for (let i = 0; i < 14; i++) { const a = i / 14 * PI * 2; add(tg, new THREE.SphereGeometry(.13, 10, 8), M.cream, Math.cos(a) * 1.2, P3.y + .05, Math.sin(a) * 1.2); if (i % 5 === 0) add(tg, ell(.2, .5, .2, 0, 0, 0, 1, 8, 6), soft(0xffb3cf), Math.cos(a + .2) * 1.33, P3.y - .35, Math.sin(a + .2) * 1.33); }
   add(tg, new THREE.SphereGeometry(.2, 12, 10), std(0xe8435f, { roughness: .2 }), 1.05, P3.y + .25, -.5);
-  const bgp = grp(G, BED), wt = candyTex.clone(); wt.repeat.set(12, .01); wt.needsUpdate = true;
+  const bgp = grp(G, BED); BED_GROUPS.candy = bgp; const wt = candyTex.clone(); wt.repeat.set(12, .01); wt.needsUpdate = true;
   add(bgp, new THREE.CylinderGeometry(1.32, 1.0, .86, 30), std(0xffffff, { map: wt, roughness: .7 }), 0, .43, 0);
   const fg = withFur(new THREE.TorusGeometry(1.02, .3, 14, 40)); fg.rotateX(PI / 2); fg.translate(0, .95, 0); bgp.add(plush(fg, 0xffc4d8, { len: .06 }));
   bgp.add(plush(ell(.98, .12, .98, 0, .8, 0), 0xfff3e4, { len: .05 }));
@@ -1148,7 +1148,7 @@ function makeJelly(sc, c) {
     for (let j = 0; j < nt; j++) for (let i = 0; i < na; i++) { const p0 = j * (na + 1) + i, p1 = p0 + na + 1; idx.push(p0, p1, p0 + 1, p0 + 1, p1, p1 + 1); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.setIndex(idx); g.computeVertexNormals(); return g; };
   const shellM = new THREE.MeshPhysicalMaterial({ color: 0xffffff, vertexColors: true, roughness: .35, iridescence: .35, iridescenceIOR: 1.3, sheen: 1, sheenColor: new THREE.Color(0xffffff), emissive: 0xff9fc0, emissiveIntensity: .32, side: THREE.DoubleSide });
-  const bgp = grp(G, BED, bedYaw), sh = new THREE.Group(); sh.position.set(0, .62, -1.5); bgp.add(sh);
+  const bgp = grp(G, BED, bedYaw), sh = new THREE.Group(); BED_GROUPS.ocean = bgp; sh.position.set(0, .62, -1.5); bgp.add(sh);
   add(sh, scallop(-1), shellM).receiveShadow = false; const hinge = new THREE.Group(); hinge.rotation.x = -1.0; sh.add(hinge); add(hinge, scallop(1), shellM).receiveShadow = false;
   for (const sgn of [-1, 1]) add(sh, new THREE.BoxGeometry(.7, .12, .4), pearl, sgn * .45, 0, .05); add(bgp, ell(1.1, .18, 1.0), corals[2], 0, .1, 0);
   bgp.add(plush(ell(1.1, .12, 1.1, 0, .32, 0), 0xdccbff, { len: .05 }));
@@ -1240,7 +1240,7 @@ const FS = { leaf: [], ground: null, fern: null }, FOREST_SEASON = {
   for (const sgn of [-1, 1]) add(tg, new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(new V3(2.3, 0, 1.2 + sgn * .3), new V3(2.1, 1.3, 1.0 + sgn * .3), new V3(P1.x + .6, P1.y - .1, P1.z + sgn * .3)), 14, .07, 8), soft(GRN)); for (let k = 0; k < 5; k++) { const u = (k + .6) / 6, q = new THREE.QuadraticBezierCurve3(new V3(2.3, 0, 1.2), new V3(2.1, 1.3, 1.0), new V3(P1.x + .6, P1.y - .1, P1.z)).getPoint(u), rn = add(tg, new THREE.CylinderGeometry(.06, .06, .6, 8), soft(0x4fa63c), q.x, q.y, q.z); rn.rotation.x = PI / 2; }
   mushroom(TREE.x - 1.7, TREE.z + 1.6, .5, 0xd9773a, false, G);
   // bed (ref: plush rose cat tree): a big red rose bloom on a leafy green stem
-  const bgp = grp(G, BED, bedYaw), RED = 0xc32641, TM = (a, x, y, tilt) => new THREE.Matrix4().makeRotationY(a).multiply(new THREE.Matrix4().makeTranslation(x, y, 0)).multiply(new THREE.Matrix4().makeRotationZ(tilt));
+  const bgp = grp(G, BED, bedYaw); BED_GROUPS.forest = bgp; const RED = 0xc32641, TM = (a, x, y, tilt) => new THREE.Matrix4().makeRotationY(a).multiply(new THREE.Matrix4().makeTranslation(x, y, 0)).multiply(new THREE.Matrix4().makeRotationZ(tilt));
   bgp.add(plush(ell(1.35, .07, 1.35, 0, .05, 0), GRN, { len: .1, density: 34, shadow: false }));
   const stG = new THREE.CylinderGeometry(.2, .26, .6, 16, 4, true); stG.translate(0, .3, 0); bgp.add(plush(stG, 0x4fa63c, { len: .04, density: 80 }));
   for (const [a, y] of [[.9, .3], [-2.2, .4]]) { const lf = ell(.75, .06, .32, 0, 0, 0, 1, 16, 8); lf.applyMatrix4(TM(a, .85, y, .35)); bgp.add(plush(lf, GRN, { len: .07, density: 40 })); }
@@ -1395,11 +1395,12 @@ function voxelize(g, set) {
   });
   return set;
 }
-const treeVox = {}, floorVox = {}; // perches: the tree; walking on the ground: the tree plus that island's mushrooms
+const treeVox = {}, floorVox = {}, bedVox = {}; // perches: the tree; walking on the ground: the tree plus that island's mushrooms
 for (const k in ISL) {
   treeVox[k] = TREE_GROUPS[k] ? voxelize(TREE_GROUPS[k], new Set()) : new Set();
   floorVox[k] = new Set(treeVox[k]);
   for (const g of MUSHROOMS) { let a = g.parent; while (a && a !== ISL[k]) a = a.parent; if (a) voxelize(g, floorVox[k]); }
+  bedVox[k] = BED_GROUPS[k] ? voxelize(BED_GROUPS[k], new Set()) : new Set(); // walking past the bed, not into it (see floorClash)
 }
 function voxHit(set, p, r, minY = -1e9) {
   const R = Math.ceil(r / VOX_C), cx = Math.round(p.x / VOX_C), cy = Math.round(p.y / VOX_C), cz = Math.round(p.z / VOX_C), rr = (r / VOX_C) ** 2, lo = Math.round(minY / VOX_C) - cy;
@@ -1644,8 +1645,9 @@ function perchClear(dt) { // on a perch: if head or body would poke into the tre
 }
 function floorClash(o) { // on the ground: would head, muzzle, chest, back or hips poke into a cat tree tier or a mushroom cap?
   const set = floorVox[env.island]; if (!set) return 0; const c = Math.cos(cat.yaw), s = Math.sin(cat.yaw); let n = 0;
+  const bed = cat.act === 'sleep' || cat.bedExit > 0 ? null : bedVox[env.island]; // heading to bed, or just climbing out: the bed doesn't block her
   _hu.copy(_hl).y += .12;
-  for (const [pt, r] of [[_hl, .17], [_hu, .15]].concat(perchPts.map(q => [q, .15]))) { _pv.set(o.x + pt.x * c + pt.z * s, o.y + pt.y, o.z - pt.x * s + pt.z * c); if (voxHit(set, _pv, r, o.y + .22)) n++; }
+  for (const [pt, r] of [[_hl, .17], [_hu, .15]].concat(perchPts.map(q => [q, .15]))) { _pv.set(o.x + pt.x * c + pt.z * s, o.y + pt.y, o.z - pt.x * s + pt.z * c); if (voxHit(set, _pv, r, o.y + .22) || (bed && voxHit(bed, _pv, r, o.y + .22))) n++; }
   return n;
 }
 const _fp = new V3();
@@ -1735,6 +1737,7 @@ function updateCat(dt, t) {
   const P = cat.P, T = POSES[cat.pose], perch = cat.loc !== 'floor' && cat.loc !== 'tunnel'; // on a perch or in a bed the tail curls round instead of hanging down through it
   for (const k in T) P[k] = damp(P[k], k === 'tailRaise' && perch ? Math.max(T[k], .12) : k === 'tailYaw' && perch ? T[k] + .35 : T[k], 7, dt);
   cat.air = damp(cat.air, cat.airT, 12, dt); cat.walkAmt = damp(cat.walkAmt, cat.moving, 9, dt);
+  if (cat.prevLoc === 'bed' && cat.loc !== 'bed') cat.bedExit = 2.5; cat.prevLoc = cat.loc; cat.bedExit = Math.max(0, (cat.bedExit || 0) - dt);
   if (String(cat.loc).startsWith('tree') && cat.air < .3) perchClear(dt); else if (cat.loc === 'floor' && cat.air < .3 && cat.pose !== 'sleep') floorClear();
   cat.root.rotation.y = cat.yaw;
   const asleep = cat.pose === 'sleep', pitch = P.pitch + cat.jumpPitch * cat.air;
