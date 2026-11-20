@@ -490,7 +490,10 @@ let waterTex, domeMat;
         float base=smoothstep(1.6,0.,vP.y)*.3;
         float al=(f*.3+band*.6+hex*.8+base*.22+.003)*(.3+.2*uNight);
         gl_FragColor=vec4(col*(1.+uNight*.35),al); }` });
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(IR + .5, 72, 36, 0, PI * 2, 0, PI / 2), domeMat); dome.frustumCulled = false; dome.renderOrder = 6; dome.scale.y = 1.55; scene.add(dome);
+  // crystal-ball barrier: a sphere whose centre floats above the meadow, so it bulges past the rim and closes in a round top;
+  // it meets the island exactly at the rim ring (radius IR + .5). It encloses the old egg-shaped dome everywhere, so nothing new pokes through.
+  const DR = 15.5, DH = Math.sqrt(DR * DR - (IR + .5) ** 2), domeG = new THREE.SphereGeometry(DR, 96, 64, 0, PI * 2, 0, Math.acos(-DH / DR)); domeG.translate(0, DH, 0);
+  const dome = new THREE.Mesh(domeG, domeMat); dome.frustumCulled = false; dome.renderOrder = 6; scene.add(dome);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(IR + .5, .045, 8, 120), new THREE.MeshBasicMaterial({ color: 0xffe2f2, transparent: true, opacity: .7 })); ring.rotation.x = PI / 2; ring.position.y = .03; scene.add(ring);
 
   // ── island 1: blossom meadow ──
