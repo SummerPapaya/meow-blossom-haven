@@ -487,13 +487,14 @@ let waterTex, domeMat;
         vec3 a=vec3(1.,.74,.92), b=vec3(.64,.88,1.), c=vec3(1.,.96,.74);
         vec3 col=mix(a,b,.5+.5*sin(f*5.+vP.y*.35+uTime*.5)); col=mix(col,c,.35+.35*sin(vP.x*.3+vP.z*.22+uTime*.3));
         float hex=smoothstep(.92,1.,sin(vP.x*1.6+uTime*.2)*sin(vP.z*1.6-uTime*.15)*sin(vP.y*1.6))*.05;
-        // faint magic: a few thin spiral currents drift up the glass, each fading in and out along its length
+        // faint magic: soft, wide ripples of glow drift slowly up and around the glass (no sharp lines)
         float ang=atan(vP.z,vP.x);
-        float cur=smoothstep(.975,1.,sin(ang*5.+vP.y*.42-uTime*.32));
-        float pulse=.5+.5*sin(ang*2.+vP.y*.23-uTime*.55); pulse*=pulse;
+        float w1=.5+.5*sin(ang*3.+vP.y*.32-uTime*.36+sin(vP.y*.18+ang*2.-uTime*.22)*1.2);
+        float w2=.5+.5*sin(-ang*2.+vP.y*.26-uTime*.28+1.7+sin(ang*3.+uTime*.15)*.8);
+        float ripple=pow(w1,7.)*.65+pow(w2,9.)*.45;
         float glow=pow(.5+.5*sin(vP.x*.17+uTime*.21)*sin(vP.y*.19-uTime*.16+vP.z*.13),5.);
-        float flow=cur*pulse*.16+glow*.05;
-        col=mix(col,vec3(1.,.93,1.),cur*pulse*.5);
+        float flow=ripple*.075+glow*.04;
+        col=mix(col,vec3(1.,.95,1.),ripple*.3);
         float base=smoothstep(1.6,0.,vP.y)*.3;
         float al=(f*.3+flow*(.7+.5*uNight)+hex*.8+base*.22+.003)*(.3+.2*uNight);
         gl_FragColor=vec4(col*(1.+uNight*.35),al); }` });
