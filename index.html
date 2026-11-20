@@ -881,7 +881,9 @@ function makeRealFlower(r, type = 0) { // 0 open bloom · 1 tulip · 2 daisy · 
   for (const [len, wd, z] of [[.82, .045, .2], [.5, .07, .17]]) { const h = new THREE.Group(); h.position.z = z; watch.add(h); add(h, new THREE.BoxGeometry(wd, len, .025), handM, 0, len / 2 - .08, 0); add(h, new THREE.TorusGeometry(wd * 1.8, wd * .5, 8, 16), handM, 0, len * .7, 0); const tip = add(h, new THREE.ConeGeometry(wd * 1.6, wd * 4.5, 4), handM, 0, len, 0); tip.scale.z = .3; clockParts.hands.push(h); }
   add(watch, new THREE.SphereGeometry(.07, 12, 10), M.gold, 0, 0, .22);
   add(watch, new THREE.CylinderGeometry(.13, .16, .26, 12), M.gold, 0, 1.3, 0); add(watch, new THREE.TorusGeometry(.22, .05, 8, 20), M.gold, 0, 1.6, 0);
-  for (const sgn of [-1, 1]) add(watch, new THREE.ConeGeometry(.3, .5, 4), M.gold, sgn * .72, 1.1, 0).rotation.set(0, PI / 4, -sgn * .5);
+  // cat ears: turn the 4-sided cone first so a flat face points forward, then tilt outwards in the clock's plane (ZYX order),
+  // so both ears lean sideways symmetrically instead of one forward and one back
+  for (const sgn of [-1, 1]) add(watch, new THREE.ConeGeometry(.3, .5, 4), M.gold, sgn * .72, 1.1, 0).rotation.set(0, PI / 4, -sgn * .5, 'ZYX');
   for (let i = 0; i < 9; i++) { const l = add(watch, new THREE.TorusGeometry(.13, .035, 6, 14), M.gold, .2 * i + .12, 1.85 + .26 * i - .012 * i * i, -.12 * i); l.rotation.y = i % 2 ? PI / 2 : 0; }
   const pend = new THREE.Group(); pend.position.set(0, -1.1, 0); watch.add(pend); clockParts.pend = pend;
   add(pend, new THREE.CylinderGeometry(.02, .02, .8, 6), M.gold, 0, -.4, 0); for (const sgn of [-1, 1]) add(pend, ell(.14, .16, .08), std(0xff9db5, { emissive: 0xff7fa8, emissiveIntensity: .4 }), sgn * .09, -.86, 0).rotation.z = sgn * .5; add(pend, new THREE.ConeGeometry(.21, .26, 4), std(0xff9db5, { emissive: 0xff7fa8, emissiveIntensity: .4 }), 0, -1.02, 0).rotation.set(PI, PI / 4, 0);
