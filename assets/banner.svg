@@ -238,6 +238,6 @@
 
   <!-- title -->
   <text x="64" y="196" font-family="Cormorant Garamond, Georgia, 'Times New Roman', serif" font-style="italic" font-weight="700" font-size="52" fill="url(#title)" filter="url(#glow)">Meow Blossom Haven</text>
-  <text x="68" y="238" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',sans-serif" font-size="20" letter-spacing="4" fill="#f4e9ff" opacity=".9">猪猪 Peach 的喵喵仙境</text>
+  <text x="68" y="238" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',sans-serif" font-size="20" letter-spacing="4" fill="#f4e9ff" opacity=".9">喵喵花间仙境</text>
   <text x="68" y="266" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="17" letter-spacing="1" fill="#e6dbff" opacity=".75">A dreamy 3D home for a ragdoll cat</text>
 </svg>
