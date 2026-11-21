@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" width="1200" height="380" role="img" aria-labelledby="t d">
   <title id="t">Meow Blossom Haven</title>
-  <desc id="d">A floating flower island inside a shimmering barrier, with a small silhouette of Peach the ragdoll cat, and four more floating islands in the distance: a forest treehouse, a moonlit cloud isle, a candy tea party and an ocean bubble, under a starry night sky.</desc>
+  <desc id="d">A floating flower island inside a shimmering barrier, with small silhouettes of Peach the ragdoll cat and two cat friends, and four more floating islands in the distance: a forest treehouse, a moonlit cloud isle, a candy tea party and an ocean bubble, under a starry night sky.</desc>
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#140f3c"/>
@@ -218,6 +218,11 @@
       <ellipse cx="0" cy="-20" rx="13" ry="14" fill="#e98aa4"/>
       <path d="M-34 2 q-10 -8 -2 -12 q8 2 10 10Z M34 2 q10 -8 2 -12 q-8 2 -10 10Z" fill="#55b56a"/>
     </g>
+    <!-- two short-haired friends: one sitting, one curled up in a loaf -->
+    <g fill="#2b2150">
+      <g transform="translate(566 273) scale(.78)"><ellipse cx="0" cy="-14" rx="12" ry="15"/><circle cx="-1" cy="-33" r="9.5"/><path d="M-9 -37 L-9.5 -47.5 L-3 -41.5Z M2 -41.5 L7.5 -47.5 L7.5 -37Z"/><path d="M-10 -3 Q-23 -2 -21 -14 Q-20 -18.5 -16.5 -17 Q-18.5 -8 -9 -8Z"/></g>
+      <g transform="translate(664 281) scale(.72)"><ellipse cx="0" cy="-8.5" rx="18" ry="9.5"/><circle cx="-15" cy="-15" r="8.5"/><path d="M-22 -18 L-23.5 -27.5 L-17 -22Z M-13 -23 L-8 -28 L-7.5 -18Z"/><path d="M14 -2 Q26 0 24 -10 Q23 -13 20 -12 Q21 -5 12 -5Z"/></g>
+    </g>
     <!-- Peach, a small sitting silhouette (side view: rounded head, short muzzle, big ruff, fluffy plume tail) -->
     <ellipse cx="608" cy="238" rx="46" ry="42" fill="url(#halo)" class="shim"/>
     <g transform="translate(608 272)" fill="#2b2150">
@@ -239,5 +244,5 @@
   <!-- title -->
   <text x="64" y="196" font-family="Cormorant Garamond, Georgia, 'Times New Roman', serif" font-style="italic" font-weight="700" font-size="52" fill="url(#title)" filter="url(#glow)">Meow Blossom Haven</text>
   <text x="68" y="238" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',sans-serif" font-size="20" letter-spacing="4" fill="#f4e9ff" opacity=".9">喵喵浮岛花境</text>
-  <text x="68" y="266" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="17" letter-spacing="1" fill="#e6dbff" opacity=".75">A dreamy 3D home for a ragdoll cat</text>
+  <text x="68" y="266" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="17" letter-spacing="1" fill="#e6dbff" opacity=".75">A dreamy 3D floating-island home for cats</text>
 </svg>

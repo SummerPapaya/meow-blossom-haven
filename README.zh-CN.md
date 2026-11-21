@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Meow Blossom Haven —— 布偶猫猪猪和她的漂浮花岛" width="100%">
+  <img src="assets/banner.svg" alt="Meow Blossom Haven —— 布偶猫猪猪和小伙伴们的漂浮花岛" width="100%">
 </p>
 
 <p align="center">

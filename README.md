@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Meow Blossom Haven — a ragdoll cat named Peach on a floating flower island" width="100%">
+  <img src="assets/banner.svg" alt="Meow Blossom Haven — Peach the ragdoll cat and friends on a floating flower island" width="100%">
 </p>
 
 <p align="center">
