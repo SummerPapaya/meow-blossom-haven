@@ -14,10 +14,10 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Meow Blossom Haven">
-<meta property="og:title" content="Meow Blossom Haven · 喵喵花间仙境">
+<meta property="og:title" content="Meow Blossom Haven · 喵喵浮岛花境">
 <meta property="og:description" content="A dreamy, interactive 3D home for Peach the ragdoll cat: five floating islands to explore. 布偶猫猪猪的梦幻 3D 浮空岛小屋。">
 <meta property="og:url" content="https://meow-blossom-haven.summercommences.com/">
-<meta property="og:image" content="https://meow-blossom-haven.summercommences.com/assets/og.png?v=4">
+<meta property="og:image" content="https://meow-blossom-haven.summercommences.com/assets/og.png?v=5">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -182,7 +182,7 @@
 <div id="flash"></div>
 <div id="start"><div>
   <h1 class="serif">Meow Blossom Haven</h1>
-  <p>喵喵花间仙境</p>
+  <p>喵喵浮岛花境</p>
   <button id="enter" disabled>加载中…</button>
   <small>首次打开需要联网加载 Three.js · 建议打开声音 · 点击任意门可前往其他浮空岛</small>
 </div></div>
@@ -229,7 +229,7 @@ const soft = (color, o = {}) => new THREE.MeshPhysicalMaterial({ color, roughnes
 
 /* ───────────── language (中文 / English) ───────────── */
 const EN = {
-  '猪猪正在等你…': 'Peach is waiting for you…', '喵喵花间仙境': 'A blossom haven for cats', '加载中…': 'Loading…', '✨ 进入小屋': '✨ Enter',
+  '猪猪正在等你…': 'Peach is waiting for you…', '喵喵浮岛花境': 'A blossom haven for cats', '加载中…': 'Loading…', '✨ 进入小屋': '✨ Enter',
   '首次打开需要联网加载 Three.js · 建议打开声音 · 点击任意门可前往其他浮空岛': 'First load needs a network connection · Sound on recommended · Click the door to visit other isles',
   '加载较慢或失败：请检查网络连接后刷新页面': 'Loading is slow or failed — check your connection and refresh',
   '拖拽旋转 · 滚轮缩放 · 点击猪猪、玩具和家具': 'Drag to orbit · Scroll to zoom · Click Peach, toys and furniture',
@@ -358,6 +358,14 @@ vec3 coatPattern(vec3 p,float n,float nn){
     if(uMode==3) c=mix(uC2,uC3,0.6+nn*0.4);
     if(uMode==5) c=mix(uC1,uC3,1.0-smoothstep(-0.25,-0.05,p.y));
     if(uMode==4) c=mix(uC1,uC3,1.0-smoothstep(-0.3,-0.05,p.y));
+  } else if(uCoat==5){ // split calico (hidden breed): white, the top of the head half yellow / half grey, and soft yellow and grey patches on the back
+    float side=smoothstep(-0.025,0.025,p.x+nn*0.05); vec3 pc=mix(uC2,uC3,side); c=uC4;
+    if(uMode==1) c=mix(c,pc,smoothstep(0.07,0.13,p.y+nn*0.05-p.z*0.12)*0.95);
+    if(uMode==2){ float top=smoothstep(-0.04,0.12,p.y+nn*0.12);
+      float y1=1.0-smoothstep(0.13,0.21,length(vec2(p.x+0.08,p.z-0.2))+nn*0.06), g1=1.0-smoothstep(0.14,0.22,length(vec2(p.x-0.1,p.z+0.14))+nn*0.06);
+      float y2=1.0-smoothstep(0.05,0.1,length(vec2(p.x-0.14,p.z-0.26))+nn*0.04), g2=1.0-smoothstep(0.05,0.1,length(vec2(p.x+0.16,p.z+0.32))+nn*0.04);
+      c=mix(c,uC2,max(y1,y2)*top*0.92); c=mix(c,uC3,max(g1,g2)*top*0.88); }
+    if(uMode==4) c=mix(c,p.x<0.0?uC2:uC3,(1.0-smoothstep(0.1,0.18,length(vec2(p.y-0.08,p.z+0.02))+nn*0.06))*0.6);
   }
   return c;
 }
@@ -1559,10 +1567,10 @@ const BREEDS = {
   silver: { name: { zh: '银渐层', en: 'Silver Shaded' }, build: 'short', face: { w: 1.1, h: .97, d: .96, ear: .82, earX: 1.12, earY: -.03, earTilt: 1.15 }, fur: .36, tailR: 1.1, size: .9, eye: 'green', nose: [0xe9a3a8, 0xb07a80],
     coat: coat(1, 0xe8eaee, 0xd2d5db, 0x6a6e76, 0xf8f9fb, { tip: .55, ear: 0x8c9098, earInner: 0xe3b4b6, tuft: 0xf6f7f9, tail: [0xdfe2e8, 0x9a9ea6], rim: 0x2f3238, freckle: 0x9a9ea6, whisker: 0xffffff }) },
 };
-// hidden breed: a chubby, round dilute calico with a pom-pom bobtail and a little bell collar (unlocked by friendship or by luck)
+// hidden breed: a chubby, round calico (head split yellow / grey) with a pom-pom bobtail and a little bell collar (unlocked by friendship or by luck)
 BREEDS.dango = { name: { zh: '团子三花', en: 'Dango Calico' }, hidden: true, build: 'short', face: { w: 1.14, h: .98, d: .94, ear: .84, earX: 1.12, earY: -.025, earTilt: 1.12 },
   fur: .32, tailR: 1, size: .92, wide: 1.18, bobtail: true, collar: true, eye: 'amber', nose: [0xf3a2ad, 0xc87f8a],
-  coat: coat(3, 0xfbf8f3, 0xe9b27e, 0x909199, 0xfbf8f3, { ear: 0xfbf8f3, earInner: 0xf2bcb4, tuft: 0xfbf8f3, tail: [0xfbf8f3, 0xe9b27e], rim: 0x7a6a62, freckle: 0xe8b8b0, whisker: 0xffffff }) };
+  coat: coat(5, 0xfbf8f3, 0xefc27c, 0x9a9ca5, 0xfbf8f3, { ear: 0xfbf8f3, earL: 0xefc27c, earR: 0x9a9ca5, earInner: 0xf2bcb4, tuft: 0xfbf8f3, tail: [0xfbf8f3, 0xe9b27e], rim: 0x7a6a62, freckle: 0xe8b8b0, whisker: 0xffffff }) };
 const unlocked = new Set();
 const PERSONALITY_INFO = {
   gentle: { zh: '温柔', en: 'Gentle', w: {} }, lazy: { zh: '慵懒', en: 'Lazy', w: { sleep: 2.6, groom: 1.4, yarn: .5, wand: .5, climb: .6, wander: .7 } },
@@ -1648,7 +1656,7 @@ function buildCat(spec, self) {
   const innerG = new THREE.ConeGeometry(.1, .19, 12); innerG.scale(1, 1, .3);
   const ears = [-1, 1].map(s => {
     const e = new THREE.Group(); e.position.set(s * .205, .26, -.01); e.rotation.set(.12, 0, -s * .44); if (FC) { e.position.x *= FC.earX; e.position.y += FC.earY; e.scale.setScalar(FC.ear); e.rotation.z *= FC.earTilt; } head.add(e);
-    e.add(furMesh(earG, { c1: spec.coat.ear, len: .03, shells: 10, density: 200, comb: new V3() }));
+    e.add(furMesh(earG, { c1: (s < 0 ? spec.coat.earL : spec.coat.earR) ?? spec.coat.ear, len: .03, shells: 10, density: 200, comb: new V3() }));
     const inn = new THREE.Mesh(innerG, std(spec.coat.earInner)); inn.position.set(0, -.025, .062); e.add(inn);
     if (SH) return e; // short-haired cats have no long ear furnishings
     const tuft = furMesh(ell(.045, .06, .02, 0, -.075, .066, 1, 8, 6), { c1: spec.coat.tuft, len: .06, shells: 8, density: 60, comb: new V3(0, .3, .3), shadow: false }); e.add(tuft);

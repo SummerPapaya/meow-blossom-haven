@@ -170,6 +170,6 @@
 
   <g><use href="#petal" transform="translate(320 300) rotate(30)" opacity=".85"/><use href="#petal" transform="translate(890 330) rotate(-20)" opacity=".85"/><use href="#petal" transform="translate(250 420) rotate(60)" opacity=".85"/><use href="#petal" transform="translate(950 600) rotate(10)" opacity=".85"/><use href="#petal" transform="translate(330 560) rotate(-40)" opacity=".85"/></g>
   <text x="600" y="98" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-style="italic" font-weight="700" font-size="60" fill="url(#title)" filter="url(#glow)">Meow Blossom Haven</text>
-  <text x="600" y="142" text-anchor="middle" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans SC',sans-serif" font-size="25" letter-spacing="5" fill="#f4e9ff">喵喵花间仙境</text>
+  <text x="600" y="142" text-anchor="middle" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans SC',sans-serif" font-size="25" letter-spacing="5" fill="#f4e9ff">喵喵浮岛花境</text>
   <text x="600" y="602" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="21" letter-spacing="1" fill="#efe6ff" opacity=".9">A dreamy 3D home for a ragdoll cat</text>
 </svg>
