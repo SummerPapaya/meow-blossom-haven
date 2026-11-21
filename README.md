@@ -22,7 +22,7 @@ An interactive, dreamy 3D home for **Peach (猪猪)**, a ragdoll cat — five fl
   - 🍭 **Candy Tea Party** — dessert-stand cat tree, cupcake bed, floating cotton candy
   - 🐳 **Ocean Deep** — coral and kelp under an air bubble, whales, manta rays and jellyfish gliding past
   - 🌲 **Forest Treehouse** — giant trees, a treehouse, squirrels, birds, an owl and rabbits
-- **Adopt more cats**: open 🐱 to add up to three more (web; one more in the mini-tool) from nine breed presets — Ragdoll, British Blue, Ginger, Tabby, Calico, Tuxedo, Siamese, Golden and Silver Shaded — pick a personality (gentle, lazy, playful, curious) and a name, or let it surprise you. Click a cat to choose who the buttons play with. Saved in your browser.
+- **Adopt more cats**: open 🐱 to add up to three more (web; one more in the mini-tool) from nine breed presets — Ragdoll, British Blue, Ginger, Tabby, Calico, Tuxedo, Siamese, Golden and Silver Shaded — pick a personality (gentle, lazy, playful, curious) and a name, or let it surprise you. Click a cat to choose who the buttons play with. The cats share the furniture politely (one at a time), keep out of each other's way, and play together — touching noses, grooming each other, chasing, napping side by side. Saved in your browser.
 - **Peach lives her own life**: strolls, grooms, naps, climbs, plays and uses the litter box, finding her way around furniture.
 - **Interactions**: pet, brush, scoop the litter, yarn ball, feather wand, climb, tunnel, feed, nap — or click things in the scene.
 - **Living world**: four seasons, dawn / day / dusk / night (starts at your local time of day), clear / cloudy / rain / snow. Her pupils narrow in daylight and widen at night.
