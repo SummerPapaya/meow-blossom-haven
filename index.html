@@ -1446,9 +1446,24 @@ function updateWonder(dt, t) {
   grin.material.opacity = E.night * (1 - E.grey) * (.35 + .3 * Math.sin(t * .35));
 }
 
-/* ───────────── Peach the ragdoll ───────────── */
-function buildCat() {
-  const col = { c1: 0xfbf7f1, c2: 0xb5a79b, c3: 0x857569, c4: 0xdfd3c7 }, mask = { c1: 0xfbf7f1, c2: 0xac9d91, c3: 0x8a7a6e, c4: 0xc9bcb0 };
+/* ───────────── cats: appearance specs, builder, roster ───────────── */
+// A cat is built from a plain, JSON-safe spec, so it can be saved, edited and shared. Peach is the first cat and always present.
+// Phase 2 adds breed presets (ragdoll, British blue, ginger, tabby, calico, tuxedo, Siamese, golden & silver shaded) and personalities.
+const CAT_LIMIT = typeof MINI !== 'undefined' && MINI ? 2 : 4; // cats on screen at once: web 4, mini-tool 2
+const PERSONALITIES = ['gentle', 'lazy', 'playful', 'curious'];
+const PEACH = {
+  id: 'peach', name: { zh: '猪猪', en: 'Peach' }, breed: 'ragdoll', personality: 'gentle', permanent: true,
+  coat: {
+    body: { c1: 0xfbf7f1, c2: 0xb5a79b, c3: 0x857569, c4: 0xdfd3c7 },  // fur shader colours: white, point, dark point, shading
+    mask: { c1: 0xfbf7f1, c2: 0xac9d91, c3: 0x8a7a6e, c4: 0xc9bcb0 },  // face
+    ear: 0x7d6e64, earInner: 0xe0b0a8, tuft: 0xf4ebe2, tail: [0xb0a297, 0x8f8177], rim: 0x74655d, freckle: 0xcbbbb0, whisker: 0xf2ece6,
+  },
+  eye: { iris: ['#dcefff', '#93c2f2', '#6298dc', '#3a62a4'], socket: '#97a6bd', fibre: 'rgba(45,75,125,.15)', limbus: 'rgba(30,48,90,.7)' },
+  nose: { pink: 0xf2a0b0, dark: 0xc97f90 },
+};
+const catName = c => tr(c.spec.name); // { zh, en } → current language
+function buildCat(spec, self) {
+  const col = spec.coat.body, mask = spec.coat.mask, EY = spec.eye;
   const root = new THREE.Group(), pivot = new THREE.Group(); root.add(pivot);
   // torso: chest + rump + big white ruff
   const bodyGeo = (() => { // one smooth, pear-shaped torso (no lumpy sphere joins): narrow at the tail, fullest at the haunch, long ruff at the chest
@@ -1476,10 +1491,10 @@ function buildCat() {
   // eyes
   const makeEyeTex = kind => canvasTex(512, 512, (c, w) => { // detailed iris: gradient, radial fibres, thin limbal ring, big round pupil, catch-lights
     const cx = w / 2, cy = w / 2, R = w * .4; c.fillStyle = '#6a5c56'; c.fillRect(0, 0, w, w);
-    let g = c.createRadialGradient(cx, cy, R * .9, cx, cy, R * 1.3); g.addColorStop(0, '#97a6bd'); g.addColorStop(1, '#6a5c56'); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R * 1.3, 0, 7); c.fill();
-    g = c.createRadialGradient(cx, cy + R * .18, R * .2, cx, cy, R); g.addColorStop(0, '#dcefff'); g.addColorStop(.5, '#93c2f2'); g.addColorStop(.84, '#6298dc'); g.addColorStop(1, '#3a62a4'); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R, 0, 7); c.fill();
-    for (let i = 0; i < 170; i++) { const a = Math.random() * PI * 2, r0 = R * (.5 + Math.random() * .12), r1 = R * (.78 + Math.random() * .2); c.strokeStyle = i % 2 ? 'rgba(255,255,255,.17)' : 'rgba(45,75,125,.15)'; c.lineWidth = 1 + Math.random() * 1.6; c.beginPath(); c.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0); c.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); c.stroke(); }
-    c.strokeStyle = 'rgba(30,48,90,.7)'; c.lineWidth = 7; c.beginPath(); c.arc(cx, cy, R - 2, 0, 7); c.stroke();
+    let g = c.createRadialGradient(cx, cy, R * .9, cx, cy, R * 1.3); g.addColorStop(0, EY.socket); g.addColorStop(1, '#6a5c56'); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R * 1.3, 0, 7); c.fill();
+    g = c.createRadialGradient(cx, cy + R * .18, R * .2, cx, cy, R); g.addColorStop(0, EY.iris[0]); g.addColorStop(.5, EY.iris[1]); g.addColorStop(.84, EY.iris[2]); g.addColorStop(1, EY.iris[3]); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R, 0, 7); c.fill();
+    for (let i = 0; i < 170; i++) { const a = Math.random() * PI * 2, r0 = R * (.5 + Math.random() * .12), r1 = R * (.78 + Math.random() * .2); c.strokeStyle = i % 2 ? 'rgba(255,255,255,.17)' : EY.fibre; c.lineWidth = 1 + Math.random() * 1.6; c.beginPath(); c.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0); c.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); c.stroke(); }
+    c.strokeStyle = EY.limbus; c.lineWidth = 7; c.beginPath(); c.arc(cx, cy, R - 2, 0, 7); c.stroke();
     const [prx, pry, pcy] = kind === 'slit' ? [.34, .72, -.36] : kind === 'round' ? [.83, .85, -.05] : [.52, .8, -.26]; // day: soft upright oval · dawn/dusk: fuller oval · night: wide and round
     const pupil0 = (gx, gy) => { c.beginPath(); c.ellipse(cx, cy + R * pcy, R * gx, R * gy, 0, 0, 7); }, pupil = (gx, gy) => { pupil0(gx, gy); c.fill(); };
     if (kind !== 'round') { c.strokeStyle = 'rgba(232,244,255,.42)'; c.lineWidth = R * .09; pupil0(prx + .13, pry + .1); c.stroke(); } // pale collarette ring hugging the pupil
@@ -1495,19 +1510,19 @@ function buildCat() {
     for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) { const u = i / nu * 2 - 1, v = j / nv * 2 - 1, inner = u * s < 0, pr = Math.pow(1 - u * u, inner ? .95 : .5), x = u * W, y = v * (v > 0 ? HU : HL) * pr + (inner ? -.013 : .007) * u * u; pos.push(x, y, .011 * (1 - u * u) * (1 - v * v * .6)); uv.push(.5 + (x * ca - y * sa) * 8.9, .5 + (x * sa + y * ca) * 8.9); }
     for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { const a = j * (nu + 1) + i, b = a + 1, c2 = a + nu + 1; idx.push(a, b, c2 + 1, a, c2 + 1, c2); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g; };
-  const eyeMat = new THREE.MeshPhysicalMaterial({ map: eyeTex, roughness: .1, clearcoat: 1, clearcoatRoughness: .04, emissive: 0xffffff, emissiveMap: eyeTex, emissiveIntensity: .32 }), rimMat = std(0x74655d, { roughness: 1 });
+  const eyeMat = new THREE.MeshPhysicalMaterial({ map: eyeTex, roughness: .1, clearcoat: 1, clearcoatRoughness: .04, emissive: 0xffffff, emissiveMap: eyeTex, emissiveIntensity: .32 }), rimMat = std(spec.coat.rim, { roughness: 1 });
   const eyes = [-1, 1].map(s => { const e = new THREE.Group(); e.position.set(s * .128, .03, .247); e.rotation.set(0, s * .42, s * .2); e.scale.setScalar(1.02); head.add(e); const eg = eyeGeoFor(s);
     e.add(new THREE.Mesh(eg, eyeMat)); const rim = new THREE.Mesh(eg, rimMat); rim.scale.set(1.1, 1.2, .6); rim.position.z = -.004; e.add(rim); return e; });
   // nose leather, philtrum, mouth, whisker-pad freckles
   { const ns = new THREE.Shape(); ns.moveTo(-.024, .017); ns.quadraticCurveTo(0, .023, .024, .017); ns.quadraticCurveTo(.037, .014, .03, .003); ns.quadraticCurveTo(.012, -.02, 0, -.023); ns.quadraticCurveTo(-.012, -.02, -.03, .003); ns.quadraticCurveTo(-.037, .014, -.024, .017);
-    const pink = new THREE.MeshPhysicalMaterial({ color: 0xf2a0b0, roughness: .45, clearcoat: .5, clearcoatRoughness: .3, emissive: 0xf2a0b0, emissiveIntensity: .28 }), dk = std(0xc97f90, { roughness: .6, emissive: 0xc97f90, emissiveIntensity: .25 });
+    const pink = new THREE.MeshPhysicalMaterial({ color: spec.nose.pink, roughness: .45, clearcoat: .5, clearcoatRoughness: .3, emissive: spec.nose.pink, emissiveIntensity: .28 }), dk = std(spec.nose.dark, { roughness: .6, emissive: spec.nose.dark, emissiveIntensity: .25 });
     const ng = new THREE.ExtrudeGeometry(ns, { depth: .01, bevelEnabled: true, bevelSize: .004, bevelThickness: .006, bevelSegments: 3, curveSegments: 10 }); const nose = new THREE.Mesh(ng, pink); nose.position.set(0, -.04, .374); nose.rotation.x = -.3; head.add(nose);
     for (const s of [-1, 1]) { const n = new THREE.Mesh(ell(.0055, .004, .003, 0, 0, 0, 1, 8, 6), dk); n.position.set(s * .013, -.046, .3895); n.rotation.z = s * .5; head.add(n); }
     const line = pts => head.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 12, .0022, 5), dk));
     line([new V3(0, -.07, .389), new V3(0, -.08, .388), new V3(0, -.089, .385)]);
     for (const s of [-1, 1]) line([new V3(0, -.089, .385), new V3(s * .016, -.1, .386), new V3(s * .034, -.098, .383), new V3(s * .048, -.086, .374)]);
-    const fr = std(0xcbbbb0, { roughness: 1 }); for (const s of [-1, 1]) for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) { const d = new THREE.Mesh(new THREE.SphereGeometry(.0032, 6, 5), fr); d.position.set(s * (.05 + k * .022), -.083 - r * .013 + k * .003, .381 - k * .012 - r * .002); head.add(d); } }
-  { const wm = new THREE.MeshStandardMaterial({ color: 0xf2ece6, roughness: 1, transparent: true, opacity: .34 }), parts = []; // hair-thin whiskers: real geometry, so they thin out with distance instead of staying 1 px wide
+    const fr = std(spec.coat.freckle, { roughness: 1 }); for (const s of [-1, 1]) for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) { const d = new THREE.Mesh(new THREE.SphereGeometry(.0032, 6, 5), fr); d.position.set(s * (.05 + k * .022), -.083 - r * .013 + k * .003, .381 - k * .012 - r * .002); head.add(d); } }
+  { const wm = new THREE.MeshStandardMaterial({ color: spec.coat.whisker, roughness: 1, transparent: true, opacity: .34 }), parts = []; // hair-thin whiskers: real geometry, so they thin out with distance instead of staying 1 px wide
     for (const s of [-1, 1]) for (let i = 0; i < 3; i++) parts.push(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(new V3(s * .085, -.085 - i * .012, .344), new V3(s * (.27 + i * .015), -.035 - i * .045, .326), new V3(s * (.4 - i * .03), -.1 - i * .08, .19)), 10, .0011, 4));
     head.add(new THREE.Mesh(mergeGeometries(parts), wm)); }
   // ears
@@ -1515,9 +1530,9 @@ function buildCat() {
   const innerG = new THREE.ConeGeometry(.1, .19, 12); innerG.scale(1, 1, .3);
   const ears = [-1, 1].map(s => {
     const e = new THREE.Group(); e.position.set(s * .205, .26, -.01); e.rotation.set(.12, 0, -s * .44); head.add(e);
-    e.add(furMesh(earG, { c1: 0x7d6e64, len: .03, shells: 10, density: 200, comb: new V3() }));
-    const inn = new THREE.Mesh(innerG, std(0xe0b0a8)); inn.position.set(0, -.025, .062); e.add(inn);
-    const tuft = furMesh(ell(.045, .06, .02, 0, -.075, .066, 1, 8, 6), { c1: 0xf4ebe2, len: .06, shells: 8, density: 60, comb: new V3(0, .3, .3), shadow: false }); e.add(tuft);
+    e.add(furMesh(earG, { c1: spec.coat.ear, len: .03, shells: 10, density: 200, comb: new V3() }));
+    const inn = new THREE.Mesh(innerG, std(spec.coat.earInner)); inn.position.set(0, -.025, .062); e.add(inn);
+    const tuft = furMesh(ell(.045, .06, .02, 0, -.075, .066, 1, 8, 6), { c1: spec.coat.tuft, len: .06, shells: 8, density: 60, comb: new V3(0, .3, .3), shadow: false }); e.add(tuft);
     return e;
   });
   const clawM = new THREE.MeshPhysicalMaterial({ color: 0xfff4e4, emissive: 0xfff0dc, emissiveIntensity: .3, roughness: .2, transparent: true, opacity: .8 });
@@ -1545,12 +1560,12 @@ function buildCat() {
   const segs = []; let parent = tailBase;
   [.1, .125, .145, .155, .15, .13, .1].forEach((r, i) => {
     const g = new THREE.Group(); g.position.z = i ? -.15 : -.05; parent.add(g);
-    g.add(furMesh(ell(r, r, r * 1.15, 0, 0, 0, 1, 14, 10), { c1: 0xb0a297, c2: 0x8f8177, mode: 3, len: .27, shells: 30, density: 150, thick: 2.5, curl: .34, comb: new V3(0, -.2, -.3) }));
+    g.add(furMesh(ell(r, r, r * 1.15, 0, 0, 0, 1, 14, 10), { c1: spec.coat.tail[0], c2: spec.coat.tail[1], mode: 3, len: .27, shells: 30, density: 150, thick: 2.5, curl: .34, comb: new V3(0, -.2, -.3) }));
     segs.push(g); parent = g;
   });
-  const onPetTip = '摸摸猪猪 Peach';
-  proxy(pivot, new THREE.SphereGeometry(.62, 10, 8), onPetTip, () => onPet(), 0, 0, .4);
-  proxy(head, new THREE.SphereGeometry(.45, 10, 8), onPetTip, () => onPet());
+  const onPetTip = spec.id === 'peach' ? '摸摸猪猪 Peach' : { zh: `摸摸${spec.name.zh}`, en: `Pet ${spec.name.en}` }, petMe = () => { selectCat(self); onPet(); };
+  proxy(pivot, new THREE.SphereGeometry(.62, 10, 8), onPetTip, petMe, 0, 0, .4);
+  proxy(head, new THREE.SphereGeometry(.45, 10, 8), onPetTip, petMe);
   return { root, pivot, body, head, eyes, ears, legs, tailBase, segs, eyeMat, eyeTexs };
 }
 const POSES = {
@@ -1562,11 +1577,30 @@ const POSES = {
   crouch: { hipY: .52, pitch: -.12, headDy: -.05, headPitch: 0,   tailRaise: .2,   tailCurl: .05, tailYaw: 0,   hind: 0 },
   crawl:  { hipY: .56, pitch: 0,    headDy: -.2,  headPitch: 0,   tailRaise: .15,  tailCurl: 0,   tailYaw: 0,   hind: 0 },
 };
-const cat = { ...buildCat(), yaw: .6, pose: 'sit', P: { ...POSES.sit }, script: [], step: null, loc: 'floor', phase: 0, moving: 0, walkAmt: 0,
-  happy: 0, blinkT: 2, blink: 0, eye: 1, idleT: 2.5, pending: null, jumpPitch: 0, air: 0, airT: 0, lookYaw: 0, lookPitch: 0, groom: 0, act: '', heartT: 0, zT: 0 };
-cat.root.position.set(.6, 0, 1.2); scene.add(cat.root);
-const blob = new THREE.Mesh(new THREE.CircleGeometry(.8, 24), new THREE.MeshBasicMaterial({ map: canvasTex(64, 64, c => { const g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(30,10,50,.55)'); g.addColorStop(1, 'rgba(30,10,50,0)'); c.fillStyle = g; c.fillRect(0, 0, 64, 64); }), transparent: true, depthWrite: false }));
-blob.rotation.x = -PI / 2; scene.add(blob);
+const cats = []; // every cat in the scene; cats[0] is Peach
+function makeCat(spec, pos, yaw = .6) {
+  if (cats.length >= CAT_LIMIT) return null;
+  const c = { spec, yaw, pose: 'sit', P: { ...POSES.sit }, script: [], step: null, loc: 'floor', phase: 0, moving: 0, walkAmt: 0,
+    happy: 0, blinkT: 2, blink: 0, eye: 1, idleT: 2.5, pending: null, jumpPitch: 0, air: 0, airT: 0, lookYaw: 0, lookPitch: 0, groom: 0, act: '', heartT: 0, zT: 0,
+    lastAuto: '', purrLevel: 0 };
+  Object.assign(c, buildCat(spec, c));
+  c.root.position.copy(pos); scene.add(c.root);
+  if (!blobGeo) blobGeo = new THREE.CircleGeometry(.8, 24); if (!blobTex) blobTex = blobTexFn();
+  c.blob = new THREE.Mesh(blobGeo, new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false })); c.blob.rotation.x = -PI / 2; scene.add(c.blob); // soft contact shadow under each cat
+  cats.push(c); return c;
+}
+/* `cat` is the cat being worked on: during the update loop each cat in turn, otherwise the selected one (the buttons, pet, camera follow act on it) */
+let cat = null, selected = null;
+function selectCat(c) { if (c && cats.includes(c)) cat = selected = c; }
+function removeCat(c) { // Peach (permanent) can't be removed
+  if (!c || c.spec.permanent || !cats.includes(c)) return false;
+  scene.remove(c.root); scene.remove(c.blob); cats.splice(cats.indexOf(c), 1);
+  for (let i = clickables.length - 1; i >= 0; i--) { let o = clickables[i]; while (o && o !== c.root) o = o.parent; if (o) clickables.splice(i, 1); }
+  if (selected === c) selectCat(cats[0]); return true;
+}
+let blobGeo = null, blobTex = null; // created on first use, in the same order as before (keeps seeded test runs comparable)
+const blobTexFn = () => canvasTex(64, 64, c => { const g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(30,10,50,.55)'); g.addColorStop(1, 'rgba(30,10,50,0)'); c.fillStyle = g; c.fillRect(0, 0, 64, 64); });
+selectCat(makeCat(PEACH, new V3(.6, 0, 1.2), .6));
 
 /* ── script steps ── */
 const walk = (to, o = {}) => ({ type: 'walk', to: to.clone(), ...o });
@@ -1612,14 +1646,13 @@ function startBehaviour(name) { const b = BEH[name]; cat.script = [...exitSteps(
 function command(name) {
   if (name === 'pet') return onPet();
   if (name === 'scoop') return startScoop();
-  cat.pending = name; lastAuto = name;
+  cat.pending = name; cat.lastAuto = name;
   if (cat.lock) { cat.pending = name; return; } // busy (e.g. in the litter box): do it right after
   if (!cat.step || !(cat.step.atomic || cat.loc === 'tunnel')) { cat.step = null; cat.script = []; cat.airT = 0; cat.jumpPitch = 0; }
 }
-let lastAuto = '';
 function autoBehave() {
-  const names = Object.keys(BEH).filter(n => n !== lastAuto); let tot = names.reduce((s, n) => s + BEH[n].w, 0), r = rnd(tot);
-  for (const n of names) { r -= BEH[n].w; if (r <= 0) { lastAuto = n; startBehaviour(n); return; } }
+  const names = Object.keys(BEH).filter(n => n !== cat.lastAuto); let tot = names.reduce((s, n) => s + BEH[n].w, 0), r = rnd(tot);
+  for (const n of names) { r -= BEH[n].w; if (r <= 0) { cat.lastAuto = n; startBehaviour(n); return; } }
 }
 function nextStep() {
   if (cat.pending && cat.loc !== 'tunnel' && !cat.lock) { const n = cat.pending; cat.pending = null; startBehaviour(n); }
@@ -1661,7 +1694,7 @@ function floorClear() { // slide out of furniture: try small steps around and ta
 function finish(s) { if (s.loc) cat.loc = s.loc; cat.step = null; }
 const headPos = () => cat.head.getWorldPosition(new V3());
 function onPet() {
-  cat.happy = 3.6; AU.purr(.55); if (Math.random() < .6) AU.meow();
+  cat.happy = 3.6; cat.purrLevel = .55; AU.purr(.55); if (Math.random() < .6) AU.meow();
   const hp = headPos(); for (let i = 0; i < 5; i++) fx(heartTex, hp.clone().add(new V3(rnd(-.3, .3), .3, rnd(-.3, .3))), new V3(rnd(-.3, .3), rnd(.6, 1.1), rnd(-.3, .3)), 1.7, rnd(.28, .42));
   const s = cat.step;
   if (s && s.type === 'walk' && !s.atomic && cat.loc === 'floor') { s.t = 0; cat.script.unshift(s); cat.step = wait(2.6, 'sit'); cat.step.t = 0; }
@@ -1693,7 +1726,7 @@ function collide(p, yaw = cat.yaw, tgt = null) { // keep the whole cat — hips,
   const r = Math.hypot(p.x, p.z); if (r > ROAM) { p.x *= ROAM / r; p.z *= ROAM / r; }
 }
 function updateCat(dt, t) {
-  const pos = cat.root.position; cat.moving = 0; cat.groom = 0; cat.airT = 0; brush.visible = false;
+  const pos = cat.root.position; cat.moving = 0; cat.groom = 0; cat.airT = 0;
   if (!cat.step) { if (cat.script.length || cat.pending) nextStep(); else { cat.idleT -= dt; if (cat.idleT <= 0) { autoBehave(); nextStep(); } } }
   const s = cat.step;
   if (s) {
@@ -1747,7 +1780,7 @@ function updateCat(dt, t) {
   // happy / blink / look
   cat.happy = Math.max(0, cat.happy - dt);
   if (cat.happy > 0) { cat.heartT -= dt; if (cat.heartT < 0) { cat.heartT = .45; fx(heartTex, headPos().add(new V3(rnd(-.3, .3), .35, rnd(-.2, .2))), new V3(rnd(-.2, .2), .8, 0), 1.5, .3); } }
-  else if (!asleep) AU.purr(0); else AU.purr(.16);
+  else cat.purrLevel = asleep ? .16 : 0; // the loudest purr of all cats plays (see step)
   { const want = env.time === 'night' ? 'round' : env.time === 'day' ? 'slit' : 'oval'; if (cat.pupil !== want) { cat.pupil = want; cat.eyeMat.map = cat.eyeMat.emissiveMap = cat.eyeTexs[want]; cat.blink = .2; } } // pupils narrow in daylight, widen at night (swapped during a blink)
   cat.blinkT -= dt; if (cat.blinkT < 0) { cat.blink = .14; cat.blinkT = rnd(2.5, 6); } cat.blink -= dt;
   cat.eye = damp(cat.eye, asleep ? .05 : cat.happy > 0 ? .16 : cat.blink > 0 ? .05 : 1, 22, dt);
@@ -1770,7 +1803,7 @@ function updateCat(dt, t) {
   const wag = cat.happy > 0 ? 2.2 : 1;
   cat.tailBase.rotation.set(-pitch + P.tailRaise + Math.sin(t * 1.1) * .05, Math.sin(t * 1.3 * wag) * .14 * wag, 0);
   cat.segs.forEach((g, i) => g.rotation.set(P.tailCurl + Math.sin(t * 1.5 - i * .5) * .03, P.tailYaw + Math.sin(t * 1.7 * wag - i * .55) * .07 * wag, 0));
-  blob.position.set(pos.x, pos.y + .04, pos.z); blob.material.opacity = cat.airT ? .25 : .8;
+  cat.blob.position.set(pos.x, pos.y + .04, pos.z); cat.blob.material.opacity = cat.airT ? .25 : .8;
 }
 
 /* ───────────── audio (all synthesized) ───────────── */
@@ -1941,8 +1974,8 @@ function updateToys(dt, t) {
   wand.v.x += (-40 * wand.a.x - 2.2 * wand.v.x) * dt; wand.v.y += (-40 * wand.a.y - 2.2 * wand.v.y) * dt; wand.a.addScaledVector(wand.v, dt);
   { // keep the pole (and the feathers hanging below its tip) out of Peach's head, muzzle and chin: nudge the spring away when they would touch
     const lean = (ax, ay) => new V3(-Math.sin(ay), Math.cos(ay) * Math.cos(ax), Math.cos(ay) * Math.sin(ax)); // pole direction for rotation (ax, 0, ay)
-    for (const [lp, clr] of [[_wHead, .34], [_wMuz, .28], [_wChin, .26]]) {
-      const hp = cat.head.localToWorld(_pv.copy(lp));
+    for (const kc of cats) for (const [lp, clr] of [[_wHead, .34], [_wMuz, .28], [_wChin, .26]]) {
+      const hp = kc.head.localToWorld(_pv.copy(lp));
       for (let it = 0; it < 3; it++) {
         const dir = lean(wand.a.x, wand.a.y), rel = hp.clone().sub(WAND), h = clamp(rel.dot(dir), .1, 1.7 + .3), cp = dir.clone().multiplyScalar(Math.min(h, 1.7)); if (h > 1.7) cp.y -= h - 1.7;
         const away = rel.clone().sub(cp); away.y = 0; const d = away.length(), need = clr - d; if (need <= 0) break;
@@ -2003,7 +2036,9 @@ const clock = new THREE.Clock(), home = new V3(0, 2.2, 0), tgt = new V3();
 let simT = 0;
 function step(dt) {
   const t = simT += dt; furShared.uTime.value = t;
-  updateEnv(dt, t); updateCat(dt, t); updateToys(dt, t); updateWonder(dt, t);
+  updateEnv(dt, t); brush.visible = false; let purr = 0;
+  for (const c of cats) { cat = c; updateCat(dt, t); purr = Math.max(purr, c.purrLevel); }
+  cat = selected; AU.purr(purr); updateToys(dt, t); updateWonder(dt, t);
   if (follow) tgt.copy(cat.root.position).add(new V3(0, .75, 0)); else tgt.copy(home);
   controls.target.lerp(tgt, 1 - Math.exp(-dt * 2.5));
   controls.autoRotate = performance.now() - lastInput > 9000; controls.autoRotateSpeed = .4;
@@ -2034,7 +2069,7 @@ document.addEventListener('visibilitychange', () => {
 renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; const st = $('#start'); AU.startWasShown = !!st && st.style.display !== 'none';
   showFallback('画面暂时中断了（图形资源被系统回收），正在等待恢复。', 'The 3D view was interrupted (graphics memory was reclaimed). Waiting for it to come back.', true); });
 renderer.domElement.addEventListener('webglcontextrestored', () => { lost = false; const fb = $('#fallback'); if (fb) fb.style.display = 'none'; const st = $('#start'); if (st && AU.startWasShown) st.style.display = ''; renderer.shadowMap.needsUpdate = true; resume(); });
-if (new URLSearchParams(location.search).has('debug')) window.peach = { perchClash, floorClash, treeVox, floorVox, THREE, renderer, scene, composer, scrub, perf, ISL, obstacles, cat, command, setEnv, setIsland, travel, env, camera, controls, AU, home, tick: (n = 60) => { for (let i = 0; i < n; i++) step(1 / 30); renderer.shadowMap.needsUpdate = true; composer.render(); }, bakeStat };
+if (new URLSearchParams(location.search).has('debug')) window.peach = { cats, makeCat, removeCat, selectCat, PEACH, CAT_LIMIT, get selected() { return selected; }, perchClash, floorClash, treeVox, floorVox, THREE, renderer, scene, composer, scrub, perf, ISL, obstacles, cat, command, setEnv, setIsland, travel, env, camera, controls, AU, home, tick: (n = 60) => { for (let i = 0; i < n; i++) step(1 / 30); renderer.shadowMap.needsUpdate = true; composer.render(); }, bakeStat };
 (async () => { // compile all shaders up front (parallel where the GPU driver allows) so neither the first frame nor an island switch stalls
   const t0 = performance.now(); step(1 / 30); // first step builds the environment map, so materials compile in their final form
   renderer.setRenderTarget(composer.renderTarget1); // compile for the composer's off-screen target: that is where the scene is really drawn (no tone mapping there)
