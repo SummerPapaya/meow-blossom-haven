@@ -66,6 +66,7 @@
   #actions i{font-style:normal;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:21px;border:1px solid var(--gold);transition:.22s;
     background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.38),rgba(255,255,255,.05) 70%)}
   #actions button:hover i{transform:translateY(-4px) scale(1.08);box-shadow:0 8px 22px var(--glow);background:radial-gradient(circle at 35% 28%,#fff6dc,#ffcfe0 55%,#cdb9ff)}
+  #who{flex-basis:100%;text-align:center;font-size:11.5px;letter-spacing:.06em;opacity:.85;margin:3px 0 0} #who[hidden]{display:none}
   .supports-flex-gap #actions{gap:10px 14px;padding:10px 20px 8px} .supports-flex-gap #actions button{margin:0}
   #hint{position:fixed;left:0;right:0;bottom:96px;text-align:center;font-size:12px;color:rgba(255,247,239,.7);pointer-events:none;letter-spacing:.12em;
     text-shadow:0 1px 6px rgba(0,0,0,.45);white-space:nowrap}
@@ -700,6 +701,13 @@ const snowMesh = new THREE.Points(snowG, snowM); snowMesh.frustumCulled = false;
 const heartTex = canvasTex(96, 96, c => { c.font = '72px serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#ff7fb0'; c.fillText('♥', 48, 52); });
 const zTex = canvasTex(96, 96, c => { c.font = 'bold 64px Georgia'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#e8e2ff'; c.fillText('z', 48, 46); });
 const noteTex = canvasTex(96, 96, c => { c.font = '64px serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff2b0'; c.fillText('✦', 48, 50); });
+const markTex = canvasTex(96, 128, c => { // a soft pink map pin with a white paw: which cat the buttons below talk to
+  const g = c.createRadialGradient(40, 36, 6, 48, 46, 42); g.addColorStop(0, '#ffd3e4'); g.addColorStop(1, '#ff8fb8');
+  c.fillStyle = g; c.strokeStyle = 'rgba(255,255,255,.95)'; c.lineWidth = 5;
+  c.beginPath(); c.arc(48, 46, 38, Math.PI * .8, Math.PI * .2); c.lineTo(48, 120); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle = '#fff'; c.beginPath(); c.ellipse(48, 56, 13, 11, 0, 0, Math.PI * 2); c.fill();
+  for (const [x, y] of [[31, 40], [42, 31], [54, 31], [65, 40]]) { c.beginPath(); c.ellipse(x, y, 5.5, 7, (x - 48) * .02, 0, Math.PI * 2); c.fill(); } });
+const mark = new THREE.Sprite(new THREE.SpriteMaterial({ map: markTex, transparent: true, depthTest: false, depthWrite: false })); mark.scale.set(.24, .32, 1); mark.renderOrder = 10; mark.visible = false; scene.add(mark);
 const fxPool = [];
 function fx(tex, p, vel, life = 1.6, size = .35) {
   let s = fxPool.find(s => s.userData.t >= s.userData.life);
@@ -2329,6 +2337,11 @@ function renderCatPanel() {
   r.appendChild(el('span', 'cp-note')); r.appendChild(cancel); r.appendChild(rand); r.appendChild(ok); P.appendChild(r);
 }
 const IS_MINI = typeof MINI !== 'undefined' && MINI;
+let whoKey = '';
+function updateWho() { // "playing with …" line above the buttons, only when there's more than one cat
+  const key = cats.length > 1 ? selected.spec.id + '|' + lang + '|' + catName(selected) : ''; if (key === whoKey) return; whoKey = key;
+  let w = $('#who'); if (!w) { w = document.createElement('div'); w.id = 'who'; $('#actions').prepend(w); }
+  w.hidden = !key; if (key) w.textContent = tr({ zh: `🐾 正在陪伴：${catName(selected)} · 点小猫可切换`, en: `🐾 With ${catName(selected)} · tap a cat to switch` }); }
 function framedShot(c) { // render the cat from the clearest 3/4 angle and return the canvas (call synchronously, before the next frame)
   const s = c.spec.size || 1, base = c.root.position.clone(), f = fwdOf(c), look = base.clone().add(new V3(0, .62 * s, 0)).addScaledVector(f, .3 * s);
   const list = []; ISL[env.island].traverse(o => { if (o.isMesh && !o.isInstancedMesh && o.visible && o.material && !Array.isArray(o.material) && o.material.visible !== false && o.material.colorWrite !== false && !o.material.transparent) list.push(o); });
@@ -2341,7 +2354,7 @@ function framedShot(c) { // render the cat from the clearest 3/4 angle and retur
     if (clear) { best = pos; break; } // head, body and paws all in plain view
   }
   const p0 = camera.position.clone(), q0 = camera.quaternion.clone(), f0 = camera.fov; camera.position.copy(best || first); camera.lookAt(look); camera.fov = 30; camera.updateProjectionMatrix();
-  composer.render(); const src = renderer.domElement, out = document.createElement('canvas'), H = src.height, W = Math.min(src.width, Math.round(H * .8));
+  const mv = mark.visible; mark.visible = false; composer.render(); mark.visible = mv; const src = renderer.domElement, out = document.createElement('canvas'), H = src.height, W = Math.min(src.width, Math.round(H * .8));
   out.width = W; out.height = H; out.getContext('2d').drawImage(src, (src.width - W) / 2, 0, W, H, 0, 0, W, H);
   camera.position.copy(p0); camera.quaternion.copy(q0); camera.fov = f0; camera.updateProjectionMatrix(); return out;
 }
@@ -2397,6 +2410,7 @@ function step(dt) {
   updateEnv(dt, t); brush.visible = false; let purr = 0;
   for (const c of cats) { cat = c; updateCat(dt, t); purr = Math.max(purr, c.purrLevel); }
   cat = selected; AU.purr(purr); updateToys(dt, t); updateWonder(dt, t);
+  mark.visible = cats.length > 1; if (mark.visible) { cat.head.getWorldPosition(mark.position); mark.position.y += .5 + Math.sin(t * 3) * .04; } updateWho();
   if (follow) tgt.copy(cat.root.position).add(new V3(0, .75, 0)); else tgt.copy(home);
   controls.target.lerp(tgt, 1 - Math.exp(-dt * 2.5));
   controls.autoRotate = performance.now() - lastInput > 9000; controls.autoRotateSpeed = .4;
