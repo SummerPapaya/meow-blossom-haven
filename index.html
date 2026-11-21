@@ -69,6 +69,25 @@
   .supports-flex-gap #actions{gap:10px 14px;padding:10px 20px 8px} .supports-flex-gap #actions button{margin:0}
   #hint{position:fixed;left:0;right:0;bottom:96px;text-align:center;font-size:12px;color:rgba(255,247,239,.7);pointer-events:none;letter-spacing:.12em;
     text-shadow:0 1px 6px rgba(0,0,0,.45);white-space:nowrap}
+  #catPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:440px;max-width:calc(100vw - 32px);max-height:82vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:18px 20px 16px;border-radius:24px;z-index:8;font-size:14px}
+  #catPanel[hidden]{display:none}
+  .cp-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px} .cp-h b{font-size:19px;letter-spacing:.06em}
+  .cp-x{background:none;border:none;font-size:22px;line-height:1;padding:2px 6px;opacity:.85}
+  .cp-cat{display:flex;align-items:center;padding:9px 10px;margin-bottom:8px;border-radius:16px;border:1px solid rgba(255,226,186,.28);background:rgba(255,255,255,.06);cursor:pointer}
+  .cp-cat.sel{border-color:rgba(255,214,232,.9);background:rgba(255,214,232,.18)}
+  .cp-sw{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:3px;border:1px solid rgba(255,255,255,.5);flex:none}
+  .cp-who{flex:1;min-width:0;margin-left:8px} .cp-who b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .cp-who small{opacity:.78}
+  .cp-btn{border:1px solid var(--gold);background:rgba(255,255,255,.12);border-radius:999px;padding:6px 13px;margin-left:6px;font-size:13px}
+  .cp-btn.main{background:linear-gradient(135deg,#fff0d0,#ffc4dc,#cdb9ff);color:#5a3565;border:none;font-weight:700}
+  .cp-btn[disabled]{opacity:.45;cursor:default}
+  .cp-sec{margin:12px 0 6px;font-size:13px;opacity:.85;letter-spacing:.06em}
+  .cp-chip{display:inline-block;margin:0 6px 6px 0;padding:6px 11px;border-radius:999px;border:1px solid rgba(255,226,186,.4);background:rgba(255,255,255,.08);font-size:13px}
+  .cp-chip.on{background:rgba(255,214,232,.32);border-color:rgba(255,214,232,.95)}
+  .cp-chip .cp-sw{width:10px;height:10px;margin-right:2px;vertical-align:-1px}
+  .cp-in{width:100%;box-sizing:border-box;padding:9px 12px;border-radius:12px;border:1px solid var(--gold);background:rgba(255,255,255,.14);color:var(--ink);font:inherit;font-size:15px}
+  .cp-in::placeholder{color:rgba(255,247,239,.55)}
+  .cp-row{display:flex;justify-content:flex-end;align-items:center;margin-top:14px} .cp-note{flex:1;font-size:12px;opacity:.7}
   #tip{position:fixed;pointer-events:none;padding:5px 13px;font-size:12.5px;border-radius:999px;display:none;letter-spacing:.06em;
     background:rgba(70,40,95,.82);border:1px solid var(--gold);white-space:nowrap}
   #flash{position:fixed;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:4;display:none;opacity:0;transition:opacity .4s;background:radial-gradient(circle at 50% 55%,#d9c8f6,#a48fdc 50%,#5d4fae)}
@@ -138,6 +157,7 @@
   <div class="orb" data-k="music"><button class="rb cur" title="背景音乐"></button><div class="fly glass">
     <button data-v="lullaby" data-e="🎐">🎐<small>八音盒</small></button><button data-v="waltz" data-e="🎻">🎻<small>圆舞曲</small></button></div></div>
   <span class="sep"></span>
+  <button id="catsBtn" class="rb" title="猫咪档案">🐱</button>
   <button id="snd" class="rb on" title="声音">🔊</button>
   <button id="follow" class="rb" title="镜头跟随猪猪">👀</button>
   <button id="lang" class="rb" style="font-size:13px;font-weight:700">EN</button>
@@ -148,6 +168,7 @@
   <button data-cmd="climb"><i>🌼</i>爬花架</button><button data-cmd="tunnel"><i>🌈</i>钻隧道</button><button data-cmd="eat"><i>🍚</i>吃饭</button>
   <button data-cmd="sleep"><i>💤</i>睡觉</button>
 </div>
+<div id="catPanel" class="glass" role="dialog" aria-label="猫咪档案" hidden></div>
 <div id="tip"></div>
 <div id="flash"></div>
 <div id="start"><div>
@@ -206,7 +227,7 @@ const EN = {
   '摸摸': 'Pet', '梳毛': 'Brush', '铲屎': 'Scoop', '毛线球': 'Yarn', '逗猫棒': 'Wand', '爬花架': 'Climb', '钻隧道': 'Tunnel', '吃饭': 'Feed', '睡觉': 'Nap',
   '花境': 'Blossom', '云月屿': 'Cloud Isle', '甜梦茶会': 'Candy', '深海秘境': 'Ocean', '森林树屋': 'Forest',
   '春': 'Spring', '夏': 'Summer', '秋': 'Autumn', '冬': 'Winter', '晨': 'Dawn', '昼': 'Day', '暮': 'Dusk', '夜': 'Night', '晴': 'Clear', '云': 'Cloudy', '雨': 'Rain', '雪': 'Snow', '八音盒': 'Music box', '圆舞曲': 'Waltz',
-  '浮空岛': 'Island', '季节': 'Season', '天光': 'Time of day', '天气': 'Weather', '背景音乐': 'Music', '声音': 'Sound', '镜头跟随猪猪': 'Follow Peach',
+  '浮空岛': 'Island', '季节': 'Season', '天光': 'Time of day', '天气': 'Weather', '背景音乐': 'Music', '声音': 'Sound', '猫咪档案': 'My cats', '镜头跟随猪猪': 'Follow Peach',
   '猪猪正在散步 🐾': 'Peach is strolling 🐾', '猪猪在舔毛 ✨': 'Peach is grooming ✨', '猪猪睡着了 💤': 'Peach is asleep 💤', '猪猪在上厕所… 🙈': 'Peach is in the litter box… 🙈', '猪猪在享受梳毛 🪮': 'Peach is enjoying a brush 🪮',
   '猪猪在爬花花猫爬架 🌼': 'Peach is climbing the cat tree 🌼', '猪猪在钻隧道 🌈': 'Peach is in the tunnel 🌈', '猪猪在追毛线球 🧶': 'Peach is chasing the yarn 🧶', '猪猪在扑逗猫棒 🪶': 'Peach is pouncing on the wand 🪶',
   '猪猪在玩小鱼 🐟': 'Peach is playing with the fish 🐟', '猪猪穿过任意门 ✨': 'Peach steps through the door ✨', '猪猪在吃饭饭 🍚': 'Peach is eating 🍚', '猪猪被摸得好舒服 💗': 'Peach loves the pets 💗',
@@ -229,7 +250,7 @@ function applyLang() {
   for (const el of document.querySelectorAll('#actions button')) put(el, () => el.lastChild.nodeValue, v => el.lastChild.nodeValue = v);
   for (const el of document.querySelectorAll('.rb[title]')) { if (el.dataset.zht === undefined) el.dataset.zht = el.title; el.title = tr(el.dataset.zht); }
   const lb = document.querySelector('#lang'); if (lb) lb.textContent = lang === 'en' ? '中' : 'EN';
-  setStatus(statusRaw);
+  setStatus(statusRaw); if (typeof renderCatPanel === 'function') renderCatPanel();
 }
 
 /* ───────────── renderer ───────────── */
@@ -288,14 +309,52 @@ void main(){
   gl_Position=projectionMatrix*viewMatrix*w;
 }`;
 const FUR_F = /* glsl */`
-uniform vec3 uC1,uC2,uC3,uC4,uLightDir,uLightCol,uSky,uGround; uniform int uMode; uniform float uDensity,uThick;
+uniform vec3 uC1,uC2,uC3,uC4,uLightDir,uLightCol,uSky,uGround; uniform int uMode,uCoat; uniform float uDensity,uThick,uTip;
 varying float vH; varying vec3 vBase; varying vec3 vN; varying vec3 vW;
 float hash(vec3 p){p=fract(p*vec3(.1031,.1030,.0973));p+=dot(p,p.yxz+33.33);return fract((p.x+p.y)*p.z);}
 float vnoise(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);
   return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
              mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+// coat patterns for breeds other than the ragdoll bicolour (uCoat 0 = the original pattern below, untouched)
+// colours: uC1 main · uC2 shade · uC3 dark (stripes, points, patches, tips) · uC4 light (belly, muzzle)
+// parts (uMode): 1 head · 2 body · 3 tail · 4 hind haunch · 5 legs
+float headLow(vec3 p,float nn){ return (1.0-smoothstep(-0.115,-0.055,p.y+nn*0.05+max(abs(p.x)-0.1,0.0)*0.5))*smoothstep(-0.2,0.02,p.z); }
+vec3 coatPattern(vec3 p,float n,float nn){
+  float ax=abs(p.x); vec3 c=uC1;
+  if(uCoat==1){ // solid (British blue; golden / silver shaded add tipping via uTip)
+    c=mix(uC1,uC2,clamp(0.25+nn*0.6,0.0,1.0)*0.5);
+    if(uMode==2) c=mix(uC4,c,smoothstep(-0.32,-0.08,p.y+nn*0.1));
+    if(uMode==1) c=mix(c,uC4,headLow(p,nn)*0.8);
+  } else if(uCoat==2){ // mackerel tabby (tabby, ginger)
+    if(uMode==2){
+      float st=smoothstep(0.25,0.8,sin(p.z*24.0+sin(p.y*6.0+p.x*3.0)*1.4+nn*5.0))*smoothstep(-0.18,0.12,p.y+nn*0.1);
+      float spine=(1.0-smoothstep(0.03,0.11,ax+nn*0.04))*smoothstep(0.05,0.25,p.y);
+      c=mix(uC4,uC1,smoothstep(-0.28,-0.02,p.y+nn*0.15)); c=mix(c,uC3,max(st*0.85,spine*0.9));
+    } else if(uMode==1){
+      c=mix(uC1,uC2,0.3+nn*0.4);
+      float fore=smoothstep(0.55,0.9,sin(p.x*60.0+nn*2.0))*smoothstep(0.06,0.2,p.y)*(1.0-smoothstep(0.1,0.2,ax))*smoothstep(0.0,0.12,p.z);
+      float cheek=smoothstep(0.6,0.9,sin(p.y*48.0+ax*10.0+nn*2.0))*smoothstep(0.13,0.2,ax)*smoothstep(-0.06,0.05,p.z)*(1.0-smoothstep(0.05,0.15,p.y));
+      c=mix(c,uC3,max(fore,cheek)*0.85); c=mix(c,uC4,headLow(p,nn));
+    } else if(uMode==3){ c=mix(uC1,uC3,smoothstep(0.2,0.7,sin(p.z*34.0+nn*2.0))*0.85); }
+    else { c=mix(uC1,uC3,smoothstep(0.35,0.8,sin(p.y*34.0+nn*2.0))*0.7); }
+  } else if(uCoat==3){ // calico: white with orange and black patches, mostly on the back and head
+    float a=vnoise(p*4.0+3.1)*0.7+vnoise(p*9.0)*0.3, b=vnoise(p*4.0+17.7)*0.7+vnoise(p*9.0+5.0)*0.3, top=1.0;
+    if(uMode==2) top=smoothstep(-0.05,0.2,p.y+nn*0.2);
+    if(uMode==1) top=smoothstep(0.0,0.12,p.y+nn*0.05)*(1.0-headLow(p,nn));
+    if(uMode==4||uMode==5) top=0.3*smoothstep(-0.1,0.05,p.y);
+    c=uC4; c=mix(c,uC2,smoothstep(0.52,0.6,a)*top); c=mix(c,uC3,smoothstep(0.55,0.63,b)*top);
+  } else if(uCoat==4){ // colourpoint (Siamese): cream body, dark face mask, ears, legs and tail
+    if(uMode==2){ c=mix(uC4,uC1,smoothstep(-0.2,0.2,p.y)); c=mix(c,uC2,(1.0-smoothstep(-0.65,-0.3,p.z))*0.5); }
+    if(uMode==1){ float m=(1.0-smoothstep(0.1,0.27,length(vec2(ax*1.1,p.y+0.04))+nn*0.04))*smoothstep(-0.05,0.12,p.z); c=mix(uC1,uC3,m); }
+    if(uMode==3) c=mix(uC2,uC3,0.6+nn*0.4);
+    if(uMode==5) c=mix(uC1,uC3,1.0-smoothstep(-0.25,-0.05,p.y));
+    if(uMode==4) c=mix(uC1,uC3,1.0-smoothstep(-0.3,-0.05,p.y));
+  }
+  return c;
+}
 vec3 pattern(vec3 p){
   float n=vnoise(p*7.0)*0.65+vnoise(p*19.0)*0.35; float nn=(n-0.5);
+  if(uCoat>0&&uMode>0) return coatPattern(p,n,nn);
   if(uMode==1){ // head: taupe mask + white inverted-V blaze, white muzzle / cheeks / chin
     float ax=abs(p.x);
     float w=0.05*(1.0-smoothstep(0.08,0.26,p.y))+0.42*(1.0-smoothstep(-0.15,0.03,p.y));
@@ -333,7 +392,9 @@ void main(){
     alpha=(1.0-smoothstep(rad*0.6,rad,d))*(1.0-0.5*smoothstep(0.55,1.0,t)); // wispy, semi-transparent tips
     if(alpha<0.03) discard;
   }
-  vec3 base=pattern(vBase)*(0.93+0.14*r); base=mix(base*0.9,base*1.06+0.015,vH);
+  vec3 base=pattern(vBase)*(0.93+0.14*r);
+  if(uTip>0.0){ float top=uMode==2?smoothstep(-0.25,0.2,vBase.y):(uMode==1?smoothstep(-0.05,0.15,vBase.y):0.7); base=mix(base,uC3,smoothstep(0.45,1.0,vH)*uTip*top); } // shaded: dark hair tips
+  base=mix(base*0.9,base*1.06+0.015,vH);
   float occ=mix(0.86,1.0,pow(max(vH,0.),0.6));
   vec3 N=normalize(vN); vec3 V=normalize(cameraPosition-vW);
   float wrap=clamp(dot(N,uLightDir)*.5+.5,0.,1.); wrap*=wrap;
@@ -346,7 +407,7 @@ function furMat(o) {
   return new THREE.ShaderMaterial({
     uniforms: {
       ...furShared, uShells: { value: o.shells }, uLen: { value: o.len }, uComb: { value: o.comb || new V3(0, -.3, 0) },
-      uMode: { value: o.mode || 0 }, uCurl: { value: o.curl ?? .16 }, uDensity: { value: o.density || 40 }, uThick: { value: o.thick || 1.75 },
+      uMode: { value: o.mode || 0 }, uCoat: { value: o.coat || 0 }, uTip: { value: o.tip || 0 }, uCurl: { value: o.curl ?? .16 }, uDensity: { value: o.density || 40 }, uThick: { value: o.thick || 1.75 },
       uC1: { value: new THREE.Color(o.c1 ?? 0xffffff) }, uC2: { value: new THREE.Color(o.c2 ?? 0xffffff) },
       uC3: { value: new THREE.Color(o.c3 ?? 0xffffff) }, uC4: { value: new THREE.Color(o.c4 ?? 0xffffff) },
     }, vertexShader: FUR_V, fragmentShader: FUR_F, alphaToCoverage: true,
@@ -1462,8 +1523,46 @@ const PEACH = {
   nose: { pink: 0xf2a0b0, dark: 0xc97f90 },
 };
 const catName = c => tr(c.spec.name); // { zh, en } → current language
+// breed presets (appearance only; phase 2 keeps colours fixed per breed). type: 0 bicolour · 1 solid · 2 tabby · 3 calico · 4 colourpoint
+const EYES = {
+  blue: ['#dcefff', '#93c2f2', '#6298dc', '#3a62a4'], deepBlue: ['#d6ecff', '#6fb3f0', '#2f74c8', '#173f86'], copper: ['#fff1c4', '#f2b950', '#d9892a', '#9a5418'],
+  gold: ['#fff8d0', '#f5d36a', '#d9a630', '#9a6d14'], amber: ['#fff4cc', '#f2c35c', '#cf8c2a', '#8a5a14'], green: ['#f1fbd6', '#b9e07c', '#79b54a', '#3d7a24'], olive: ['#fbf8d0', '#d6d86a', '#a3ad3a', '#5e6a1c'],
+};
+const coat = (type, c1, c2, c3, c4, o = {}) => ({ type, body: { c1, c2, c3, c4 }, mask: { c1, c2, c3, c4 }, ...o });
+const BREEDS = {
+  ragdoll: { name: { zh: '布偶猫', en: 'Ragdoll' }, fur: 1, size: 1, eye: 'blue', nose: [0xf2a0b0, 0xc97f90],
+    coat: { type: 0, body: { c1: 0xf8f8fb, c2: 0x9aa3b5, c3: 0x6a7387, c4: 0xd5dae3 }, mask: { c1: 0xf8f8fb, c2: 0x939cae, c3: 0x646d80, c4: 0xc3c9d4 },
+      ear: 0x6a7387, earInner: 0xd9b3b3, tuft: 0xf2f2f6, tail: [0x9ba4b6, 0x7a8396], rim: 0x6a7080, freckle: 0xc4c8d2, whisker: 0xf2f2f4 } },
+  british: { name: { zh: '英短蓝猫', en: 'British Blue' }, fur: .5, tailR: .7, size: 1.04, eye: 'copper', nose: [0x7d8090, 0x5c5f6b],
+    coat: coat(1, 0x8e97a6, 0x7c8595, 0x5f6776, 0xa3abb8, { ear: 0x7c8595, earInner: 0xb79c9f, tuft: 0x9aa2af, tail: [0x8e97a6, 0x7c8595], rim: 0x4c535e, freckle: 0x7b828f, whisker: 0xd8dbe0 }) },
+  ginger: { name: { zh: '橘猫', en: 'Ginger' }, fur: .55, tailR: .65, size: 1.02, eye: 'gold', nose: [0xf0a0a0, 0xc77c7c],
+    coat: coat(2, 0xf0a453, 0xe39342, 0xc66a23, 0xfbe0b8, { ear: 0xd98436, earInner: 0xf2b8a8, tuft: 0xfbe6cc, tail: [0xf0a453, 0xe39342], rim: 0x9b5a2a, freckle: 0xd99a68, whisker: 0xfff6ea }) },
+  tabby: { name: { zh: '狸花猫', en: 'Tabby' }, fur: .5, tailR: .62, size: .98, eye: 'green', nose: [0xc9776c, 0x8f4e47],
+    coat: coat(2, 0xa08b6e, 0x8a7559, 0x3e3328, 0xd9cbb3, { ear: 0x6b5a46, earInner: 0xd8aaa0, tuft: 0xd9cbb3, tail: [0xa08b6e, 0x8a7559], rim: 0x3a3028, freckle: 0x5c4d3d, whisker: 0xf4efe6 }) },
+  calico: { name: { zh: '三花猫', en: 'Calico' }, fur: .55, tailR: .65, size: .97, eye: 'amber', nose: [0xf3a2ad, 0xc87f8a],
+    coat: coat(3, 0xf8f4ee, 0xe89a4c, 0x3b3230, 0xf8f4ee, { ear: 0xe89a4c, earInner: 0xf2b8b0, tuft: 0xf8f4ee, tail: [0xe89a4c, 0x3b3230], rim: 0x5a4a40, freckle: 0xd6c4b8, whisker: 0xffffff }) },
+  tuxedo: { name: { zh: '奶牛猫', en: 'Tuxedo' }, fur: .55, tailR: .65, size: 1, eye: 'olive', nose: [0xf0a3ad, 0xb97a84],
+    coat: coat(0, 0xf7f5f2, 0x2a2627, 0x1b1819, 0x3a3536, { ear: 0x241f20, earInner: 0xc9a0a4, tuft: 0xeeeeee, tail: [0x2a2627, 0x1b1819], rim: 0x161314, freckle: 0x2a2627, whisker: 0xffffff }) },
+  siamese: { name: { zh: '暹罗猫', en: 'Siamese' }, fur: .45, tailR: .55, size: .95, eye: 'deepBlue', nose: [0x6a4a44, 0x3e2a26],
+    coat: coat(4, 0xf3e6d2, 0xd9c3a3, 0x4a372c, 0xfaf3e8, { ear: 0x3e2e25, earInner: 0x8a6a5e, tuft: 0x6a5245, tail: [0x5a463a, 0x3e2e25], rim: 0x3a2a22, freckle: 0x5a463a, whisker: 0xf3ece2 }) },
+  golden: { name: { zh: '金渐层', en: 'Golden Shaded' }, fur: .6, tailR: .72, size: 1.03, eye: 'green', nose: [0xd98a7e, 0xa65e54],
+    coat: coat(1, 0xf0d9ad, 0xdcb77c, 0x7a5226, 0xf9eedb, { tip: .9, ear: 0xb98a4c, earInner: 0xe8b0a0, tuft: 0xf8e6c4, tail: [0xe8c27e, 0xb98a4c], rim: 0x6e4c28, freckle: 0xc9a06a, whisker: 0xfff6e4 }) },
+  silver: { name: { zh: '银渐层', en: 'Silver Shaded' }, fur: .6, tailR: .72, size: 1.03, eye: 'green', nose: [0xe9a3a8, 0xb07a80],
+    coat: coat(1, 0xe6e8ec, 0xc9ccd3, 0x3c3f46, 0xf8f9fb, { tip: .9, ear: 0x8c9098, earInner: 0xe3b4b6, tuft: 0xf6f7f9, tail: [0xdfe2e8, 0x9a9ea6], rim: 0x2f3238, freckle: 0x9a9ea6, whisker: 0xffffff }) },
+};
+const PERSONALITY_INFO = {
+  gentle: { zh: '温柔', en: 'Gentle', w: {} }, lazy: { zh: '慵懒', en: 'Lazy', w: { sleep: 2.6, groom: 1.4, yarn: .5, wand: .5, climb: .6, wander: .7 } },
+  playful: { zh: '贪玩', en: 'Playful', w: { yarn: 2.4, wand: 2.4, tunnel: 1.8, climb: 1.5, sleep: .5 } }, curious: { zh: '好奇', en: 'Curious', w: { wander: 2, climb: 1.8, tunnel: 1.6 } },
+};
+const CAT_NAMES = [['团子', 'Dumpling'], ['奶糖', 'Toffee'], ['年糕', 'Mochi'], ['布丁', 'Pudding'], ['可可', 'Cocoa'], ['栗子', 'Chestnut'], ['汤圆', 'Tangyuan'], ['豆包', 'Bean'], ['芝麻', 'Sesame'], ['雪球', 'Snowball'], ['奶茶', 'Boba'], ['麻薯', 'Daifuku']];
+const cleanName = v => Array.from(String(v == null ? '' : v).replace(/[\u0000-\u001f<>]/g, '').trim()).slice(0, 12).join(''); // shown as plain text only, 12 characters max
+function specFromBreed(breed, name, personality, id) { // a full, JSON-safe spec from a breed preset
+  const B = BREEDS[breed] || BREEDS.ragdoll, nm = typeof name === 'string' ? { zh: cleanName(name), en: cleanName(name) } : { zh: cleanName(name && name.zh), en: cleanName(name && name.en) };
+  return { id: id || 'c' + Date.now().toString(36) + Math.floor(Math.random() * 1e4), name: nm, breed, personality: PERSONALITY_INFO[personality] ? personality : 'gentle', permanent: false,
+    coat: JSON.parse(JSON.stringify(B.coat)), eye: { ...PEACH.eye, iris: EYES[B.eye].slice() }, nose: { pink: B.nose[0], dark: B.nose[1] }, fur: B.fur, tailR: B.tailR, size: B.size };
+}
 function buildCat(spec, self) {
-  const col = spec.coat.body, mask = spec.coat.mask, EY = spec.eye;
+  const col = spec.coat.body, mask = spec.coat.mask, EY = spec.eye, K = spec.coat.type || 0, tip = spec.coat.tip || 0, FL = spec.fur ?? 1, HL = FL === 1 ? 1 : .7, TR = spec.tailR ?? 1, cz = { coat: K, tip };
   const root = new THREE.Group(), pivot = new THREE.Group(); root.add(pivot);
   // torso: chest + rump + big white ruff
   const bodyGeo = (() => { // one smooth, pear-shaped torso (no lumpy sphere joins): narrow at the tail, fullest at the haunch, long ruff at the chest
@@ -1473,7 +1572,7 @@ function buildCat(spec, self) {
     for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { const a = i * nv + j, b = i * nv + (j + 1) % nv, c = a + nv, e = b + nv; idx.push(a, b, e, a, e, c); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('aFur', new THREE.Float32BufferAttribute(fur, 1)); g.setIndex(idx); g.computeVertexNormals(); return g; })();
   const body = furMesh(bodyGeo,
-    { ...col, mode: 2, len: .138, shells: 36, density: 190, thick: 2.5, curl: .3, comb: new V3(0, -.5, -.35) });
+    { ...col, ...cz, mode: 2, len: .138 * FL, shells: 36, density: 190, thick: 2.5, curl: .3 * FL, comb: new V3(0, -.5, -.35) });
   body.position.z = .38; pivot.add(body);
   // head: skull + fluffy cheeks + muzzle
   const head = new THREE.Group(); head.position.set(0, .41, 1.07); head.scale.setScalar(1.12); pivot.add(head);
@@ -1487,7 +1586,7 @@ function buildCat(spec, self) {
     for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const a0 = j * cols + i, b0 = j * cols + (i + 1) % cols, c0 = a0 + cols, e0 = b0 + cols; idx.push(a0, c0, b0, b0, c0, e0); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setAttribute('aFur', new THREE.Float32BufferAttribute(fur, 1)); g.setIndex(idx); g.computeVertexNormals(); return g; })();
   head.add(furMesh(mergeGeometries([skullGeo, ell(.055, .05, .07, 0, -.035, .258, .45, 12, 8), ell(.13, .12, .15, .17, -.11, .02, 2.4), ell(.13, .12, .15, -.17, -.11, .02, 2.4), ell(.155, .11, .132, 0, -.082, .25, .4), ell(.092, .076, .074, .062, -.1, .294, .42, 14, 10), ell(.092, .076, .074, -.062, -.1, .294, .42, 14, 10), ell(.075, .05, .06, 0, -.15, .252, .25, 12, 8)]),
-    { ...mask, mode: 1, len: .074, shells: 30, density: 230, thick: 2.5, curl: .22, comb: new V3(0, -.35, -.25) }));
+    { ...mask, ...cz, mode: 1, len: .074 * HL, shells: 30, density: 230, thick: 2.5, curl: .22, comb: new V3(0, -.35, -.25) }));
   // eyes
   const makeEyeTex = kind => canvasTex(512, 512, (c, w) => { // detailed iris: gradient, radial fibres, thin limbal ring, big round pupil, catch-lights
     const cx = w / 2, cy = w / 2, R = w * .4; c.fillStyle = '#6a5c56'; c.fillRect(0, 0, w, w);
@@ -1538,13 +1637,14 @@ function buildCat(spec, self) {
   const clawM = new THREE.MeshPhysicalMaterial({ color: 0xfff4e4, emissive: 0xfff0dc, emissiveIntensity: .3, roughness: .2, transparent: true, opacity: .8 });
   // articulated legs: shoulder/hip → elbow/knee (→ hock on the hind legs) → paw
   const seg = (r, len) => { const g = withFur(new THREE.CapsuleGeometry(r, len, 6, 14)); g.translate(0, -len / 2, 0); return g; };
-  const white = () => ({ c1: col.c1, len: .05, shells: 14, density: 160, thick: 2.3, comb: new V3(0, -.3, 0) });
+  const white = () => K === 0 ? { c1: col.c1, len: .05, shells: 14, density: 160, thick: 2.3, comb: new V3(0, -.3, 0) } // ragdoll / tuxedo: white socks
+    : { ...col, ...cz, mode: 5, len: .05 * HL, shells: 14, density: 160, thick: 2.3, comb: new V3(0, -.3, 0) };
   const pawGeo = (y) => ell(.118, .075, .155, 0, y, .06, .8, 16, 10);
   const legs = [[-.16, -.1, .68, 0, 0], [.16, -.1, .68, PI, 0], [-.2, -.1, -.1, PI, 1], [.2, -.1, -.1, 0, 1]].map(([x, y, z, ph, hind]) => {
     const L = new THREE.Group(); L.position.set(x, y, z); pivot.add(L);
     const U = new THREE.Group(), K = new THREE.Group(); L.add(U); U.add(K); let F = null, end = K, endY;
     if (hind) {
-      U.add(furMesh(mergeGeometries([seg(.115, .27), ell(.19, .23, .22, 0, -.1, .0, 1.2, 18, 12)]), { ...col, mode: 4, len: .07, shells: 16, density: 160, thick: 2.3, comb: new V3(0, -.3, -.2) }));
+      U.add(furMesh(mergeGeometries([seg(.115, .27), ell(.19, .23, .22, 0, -.1, .0, 1.2, 18, 12)]), { ...col, ...cz, mode: 4, len: .07 * HL, shells: 16, density: 160, thick: 2.3, comb: new V3(0, -.3, -.2) }));
       K.position.y = -.27; F = new THREE.Group(); F.position.y = -.25; K.add(F); K.add(furMesh(seg(.085, .25), white()));
       F.add(furMesh(mergeGeometries([seg(.07, .14), pawGeo(-.16)]), white())); end = F; endY = -.19;
     } else {
@@ -1560,7 +1660,7 @@ function buildCat(spec, self) {
   const segs = []; let parent = tailBase;
   [.1, .125, .145, .155, .15, .13, .1].forEach((r, i) => {
     const g = new THREE.Group(); g.position.z = i ? -.15 : -.05; parent.add(g);
-    g.add(furMesh(ell(r, r, r * 1.15, 0, 0, 0, 1, 14, 10), { c1: spec.coat.tail[0], c2: spec.coat.tail[1], mode: 3, len: .27, shells: 30, density: 150, thick: 2.5, curl: .34, comb: new V3(0, -.2, -.3) }));
+    g.add(furMesh(ell(r * TR, r * TR, r * 1.15 * TR, 0, 0, 0, 1, 14, 10), { c1: spec.coat.tail[0], c2: spec.coat.tail[1], ...(K ? { c3: col.c3, c4: col.c4 } : {}), ...cz, mode: 3, len: .27 * FL, shells: 30, density: 150, thick: 2.5, curl: .34, comb: new V3(0, -.2, -.3) }));
     segs.push(g); parent = g;
   });
   const onPetTip = spec.id === 'peach' ? '摸摸猪猪 Peach' : { zh: `摸摸${spec.name.zh}`, en: `Pet ${spec.name.en}` }, petMe = () => { selectCat(self); onPet(); };
@@ -1584,7 +1684,7 @@ function makeCat(spec, pos, yaw = .6) {
     happy: 0, blinkT: 2, blink: 0, eye: 1, idleT: 2.5, pending: null, jumpPitch: 0, air: 0, airT: 0, lookYaw: 0, lookPitch: 0, groom: 0, act: '', heartT: 0, zT: 0,
     lastAuto: '', purrLevel: 0 };
   Object.assign(c, buildCat(spec, c));
-  c.root.position.copy(pos); scene.add(c.root);
+  c.root.position.copy(pos); if (spec.size && spec.size !== 1) c.root.scale.setScalar(spec.size); scene.add(c.root);
   if (!blobGeo) blobGeo = new THREE.CircleGeometry(.8, 24); if (!blobTex) blobTex = blobTexFn();
   c.blob = new THREE.Mesh(blobGeo, new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false })); c.blob.rotation.x = -PI / 2; scene.add(c.blob); // soft contact shadow under each cat
   cats.push(c); return c;
@@ -1595,6 +1695,8 @@ function selectCat(c) { if (c && cats.includes(c)) cat = selected = c; }
 function removeCat(c) { // Peach (permanent) can't be removed
   if (!c || c.spec.permanent || !cats.includes(c)) return false;
   scene.remove(c.root); scene.remove(c.blob); cats.splice(cats.indexOf(c), 1);
+  const seen = new Set(), free = o => { if (o && !seen.has(o) && o !== blobTex && o !== blobGeo) { seen.add(o); o.dispose(); } };
+  c.root.traverse(o => { if (o.geometry) free(o.geometry); for (const m of o.material ? [].concat(o.material) : []) { if (m === invisible || m === shadowOnly) continue; for (const k of ['map', 'emissiveMap']) free(m[k]); free(m); } }); free(c.blob.material);
   for (let i = clickables.length - 1; i >= 0; i--) { let o = clickables[i]; while (o && o !== c.root) o = o.parent; if (o) clickables.splice(i, 1); }
   if (selected === c) selectCat(cats[0]); return true;
 }
@@ -1642,7 +1744,11 @@ const BEH = {
       call(() => { setIsland(pendingIsland || Object.keys(ISL)[(Object.keys(ISL).indexOf(env.island) + 1) % Object.keys(ISL).length]); pendingIsland = null; flash(false); AU.chime(1.5); }), wait(.3, 'stand'), walk(doorOut, { free: true }), call(() => { door.target = 0; cat.lock = false; }), wait(1.3, 'sit')] },
   eat:    { w: 7, label: '猪猪在吃饭饭 🍚', steps: () => [walk(bowlFront), face(BOWL), wait(6, 'eat', { tick: (dt, s) => { s.m = (s.m || 0) - dt; if (s.m < 0) { s.m = .42; AU.munch(); } } }), wait(1.6, 'sit')] },
 };
-function startBehaviour(name) { const b = BEH[name]; cat.script = [...exitSteps(), ...b.steps()]; cat.act = name; setStatus(b.label); }
+function catSays(label) { // status lines name the cat they're about; only the selected cat speaks
+  if (cat !== selected) return; if (cat === cats[0]) return setStatus(label);
+  const n = cat.spec.name; setStatus({ zh: String(label).split('猪猪').join(n.zh), en: String(EN[label] || label).split('Peach').join(n.en) });
+}
+function startBehaviour(name) { const b = BEH[name]; cat.script = [...exitSteps(), ...b.steps()]; cat.act = name; catSays(b.label); }
 function command(name) {
   if (name === 'pet') return onPet();
   if (name === 'scoop') return startScoop();
@@ -1651,8 +1757,9 @@ function command(name) {
   if (!cat.step || !(cat.step.atomic || cat.loc === 'tunnel')) { cat.step = null; cat.script = []; cat.airT = 0; cat.jumpPitch = 0; }
 }
 function autoBehave() {
-  const names = Object.keys(BEH).filter(n => n !== cat.lastAuto); let tot = names.reduce((s, n) => s + BEH[n].w, 0), r = rnd(tot);
-  for (const n of names) { r -= BEH[n].w; if (r <= 0) { cat.lastAuto = n; startBehaviour(n); return; } }
+  const pw = (PERSONALITY_INFO[cat.spec.personality] || PERSONALITY_INFO.gentle).w, W = n => BEH[n].w * (pw[n] || 1);
+  const names = Object.keys(BEH).filter(n => n !== cat.lastAuto && (n !== 'door' || cat === cats[0])); let tot = names.reduce((s, n) => s + W(n), 0), r = rnd(tot);
+  for (const n of names) { r -= W(n); if (r <= 0) { cat.lastAuto = n; startBehaviour(n); return; } }
 }
 function nextStep() {
   if (cat.pending && cat.loc !== 'tunnel' && !cat.lock) { const n = cat.pending; cat.pending = null; startBehaviour(n); }
@@ -1698,7 +1805,7 @@ function onPet() {
   const hp = headPos(); for (let i = 0; i < 5; i++) fx(heartTex, hp.clone().add(new V3(rnd(-.3, .3), .3, rnd(-.3, .3))), new V3(rnd(-.3, .3), rnd(.6, 1.1), rnd(-.3, .3)), 1.7, rnd(.28, .42));
   const s = cat.step;
   if (s && s.type === 'walk' && !s.atomic && cat.loc === 'floor') { s.t = 0; cat.script.unshift(s); cat.step = wait(2.6, 'sit'); cat.step.t = 0; }
-  if (cat.pose !== 'sleep') setStatus('猪猪被摸得好舒服 💗');
+  if (cat.pose !== 'sleep') catSays('猪猪被摸得好舒服 💗');
 }
 /* ── path-finding: breadth-first search on a coarse grid of the walkable disc, then straightened by line of sight ── */
 const GN = 41, GS = .5, G0 = -10; let gridC = null, gridN = -1;
@@ -2026,6 +2133,70 @@ $('#lang').onclick = () => {
   if (urlLang) try { const u = new URL(location.href); u.searchParams.delete('lang'); history.replaceState(history.state, '', u); } catch (e) {}
   applyLang();
 };
+/* ── my cats: roster panel, adopt (breed · personality · name, or all random), remove; saved locally ── */
+const store = { // small JSON values; the mini-tool build swaps this for the container Storage API
+  get: k => new Promise(r => { try { r(JSON.parse(localStorage.getItem(k))); } catch (e) { r(null); } }),
+  set: (k, v) => new Promise(r => { try { localStorage.setItem(k, JSON.stringify(v)); r(true); } catch (e) { r(false); } }),
+};
+const CATS_KEY = 'mbh-cats', SPAWN = [new V3(-1.6, 0, 2.6), new V3(2.3, 0, 2.5), new V3(.4, 0, 3.7)];
+const hex = n => '#' + ('00000' + n.toString(16)).slice(-6);
+const swatches = coat => [coat.body.c1, coat.body.c2, coat.body.c3].filter((v, i, a) => a.indexOf(v) === i).slice(0, 3);
+function saveCats() { store.set(CATS_KEY, cats.filter(c => !c.spec.permanent).map(c => ({ id: c.spec.id, name: c.spec.name, breed: c.spec.breed, personality: c.spec.personality }))); }
+function adopt(o) {
+  const spot = SPAWN.find(q => cats.every(c => Math.hypot(c.root.position.x - q.x, c.root.position.z - q.z) > 1.2)) || SPAWN[cats.length % SPAWN.length];
+  return makeCat(specFromBreed(o.breed, o.name, o.personality, o.id), spot.clone(), Math.random() * PI * 2);
+}
+let catForm = null; // the adopt form's state while it is open
+const randomForm = () => { const n = pick(CAT_NAMES); return { breed: pick(Object.keys(BREEDS)), personality: pick(Object.keys(PERSONALITY_INFO)), name: lang === 'en' ? n[1] : n[0], pair: n }; }; // a suggested name keeps both languages
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function renderCatPanel() {
+  const P = $('#catPanel'); if (!P || P.hidden) return; P.textContent = '';
+  const h = el('div', 'cp-h'); h.appendChild(el('b', null, tr({ zh: '🐱 猫咪档案', en: '🐱 My cats' })));
+  const x = el('button', 'cp-x', '×'); x.setAttribute('aria-label', tr({ zh: '关闭', en: 'Close' })); x.addEventListener('click', () => toggleCatPanel(false)); h.appendChild(x); P.appendChild(h);
+  for (const c of cats) {
+    const row = el('div', 'cp-cat' + (c === selected ? ' sel' : ''));
+    for (const v of swatches(c.spec.coat)) { const d = el('span', 'cp-sw'); d.style.background = hex(v); row.appendChild(d); }
+    const who = el('div', 'cp-who'); who.appendChild(el('b', null, catName(c)));
+    who.appendChild(el('small', null, tr((BREEDS[c.spec.breed] || BREEDS.ragdoll).name) + ' · ' + tr(PERSONALITY_INFO[c.spec.personality] || PERSONALITY_INFO.gentle) + (c.spec.permanent ? tr({ zh: ' · 主人公', en: ' · the star' }) : '')));
+    row.appendChild(who);
+    row.addEventListener('click', () => { focusCat(c); renderCatPanel(); });
+    if (!c.spec.permanent) { const rm = el('button', 'cp-btn', tr({ zh: '送走', en: 'Remove' })); rm.addEventListener('click', e => { e.stopPropagation();
+      if (confirm(tr({ zh: `确定让 ${catName(c)} 离开小屋吗？`, en: `Let ${catName(c)} leave the haven?` }))) { removeCat(c); saveCats(); renderCatPanel(); } }); row.appendChild(rm); }
+    P.appendChild(row);
+  }
+  if (!catForm) {
+    const r = el('div', 'cp-row'); r.appendChild(el('span', 'cp-note', tr({ zh: `最多 ${CAT_LIMIT} 只猫咪同时在小屋`, en: `Up to ${CAT_LIMIT} cats at a time` })));
+    const add = el('button', 'cp-btn main', tr({ zh: '＋ 领养一只小猫', en: '＋ Adopt a cat' })); add.disabled = cats.length >= CAT_LIMIT;
+    add.addEventListener('click', () => { catForm = { breed: 'ragdoll', personality: 'gentle', name: '' }; renderCatPanel(); }); r.appendChild(add); P.appendChild(r); return;
+  }
+  const f = catForm, sec = t => P.appendChild(el('div', 'cp-sec', tr(t)));
+  sec({ zh: '名字', en: 'Name' }); const nameIn = el('input', 'cp-in'); nameIn.maxLength = 24; nameIn.value = f.name; nameIn.placeholder = tr({ zh: '给小猫起个名字（可留空）', en: 'Name your cat (optional)' });
+  nameIn.addEventListener('input', () => { f.name = nameIn.value; f.pair = null; }); P.appendChild(nameIn);
+  sec({ zh: '品种', en: 'Breed' }); const bw = el('div');
+  for (const k in BREEDS) { const ch = el('button', 'cp-chip' + (f.breed === k ? ' on' : '')); for (const v of swatches(BREEDS[k].coat)) { const d = el('span', 'cp-sw'); d.style.background = hex(v); ch.appendChild(d); }
+    ch.appendChild(document.createTextNode(' ' + tr(BREEDS[k].name))); ch.addEventListener('click', () => { f.breed = k; renderCatPanel(); }); bw.appendChild(ch); }
+  P.appendChild(bw);
+  sec({ zh: '性格', en: 'Personality' }); const pw = el('div');
+  for (const k in PERSONALITY_INFO) { const ch = el('button', 'cp-chip' + (f.personality === k ? ' on' : ''), tr(PERSONALITY_INFO[k])); ch.addEventListener('click', () => { f.personality = k; renderCatPanel(); }); pw.appendChild(ch); }
+  P.appendChild(pw);
+  const r = el('div', 'cp-row'), cancel = el('button', 'cp-btn', tr({ zh: '取消', en: 'Cancel' })), rand = el('button', 'cp-btn', tr({ zh: '🎲 全部随机', en: '🎲 Surprise me' })), ok = el('button', 'cp-btn main', tr({ zh: '领养', en: 'Adopt' }));
+  cancel.addEventListener('click', () => { catForm = null; renderCatPanel(); });
+  rand.addEventListener('click', () => { catForm = randomForm(); renderCatPanel(); });
+  ok.addEventListener('click', () => {
+    if (cats.length >= CAT_LIMIT) return;
+    const nm = cleanName(f.name), pr = f.pair || pick(CAT_NAMES), name = f.pair || !nm ? { zh: pr[0], en: pr[1] } : nm;
+    const c = adopt({ breed: f.breed, personality: f.personality, name }); catForm = null; if (!c) return;
+    saveCats(); focusCat(c); setStatus({ zh: `${c.spec.name.zh} 来到了小屋 🐾`, en: `${c.spec.name.en} moved into the haven 🐾` }); toggleCatPanel(false);
+  });
+  r.appendChild(el('span', 'cp-note')); r.appendChild(cancel); r.appendChild(rand); r.appendChild(ok); P.appendChild(r);
+}
+function focusCat(c) { selectCat(c); follow = true; $('#follow').classList.add('on'); }
+function toggleCatPanel(open = $('#catPanel').hidden) { const P = $('#catPanel'); P.hidden = !open; $('#catsBtn').classList.toggle('on', open); if (!open) catForm = null; renderCatPanel(); }
+$('#catsBtn').onclick = () => toggleCatPanel();
+store.get(CATS_KEY).then(list => { // bring back the cats adopted earlier (Peach is always there)
+  if (Array.isArray(list)) for (const o of list.slice(0, CAT_LIMIT - 1)) if (o && BREEDS[o.breed] && !cats.some(c => c.spec.id === o.id)) adopt({ ...o, id: cleanName(o.id) || undefined });
+  renderCatPanel();
+});
 applyLang();
 function enter(withSound) { if (withSound) { AU.init(); setTimeout(() => AU.meow(), 900); } const s = $('#start'); s.style.opacity = 0; setTimeout(() => s.remove(), 900); lastInput = performance.now(); }
 $('#enter').onclick = () => enter(true);
@@ -2069,7 +2240,7 @@ document.addEventListener('visibilitychange', () => {
 renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; const st = $('#start'); AU.startWasShown = !!st && st.style.display !== 'none';
   showFallback('画面暂时中断了（图形资源被系统回收），正在等待恢复。', 'The 3D view was interrupted (graphics memory was reclaimed). Waiting for it to come back.', true); });
 renderer.domElement.addEventListener('webglcontextrestored', () => { lost = false; const fb = $('#fallback'); if (fb) fb.style.display = 'none'; const st = $('#start'); if (st && AU.startWasShown) st.style.display = ''; renderer.shadowMap.needsUpdate = true; resume(); });
-if (new URLSearchParams(location.search).has('debug')) window.peach = { cats, makeCat, removeCat, selectCat, PEACH, CAT_LIMIT, get selected() { return selected; }, perchClash, floorClash, treeVox, floorVox, THREE, renderer, scene, composer, scrub, perf, ISL, obstacles, cat, command, setEnv, setIsland, travel, env, camera, controls, AU, home, tick: (n = 60) => { for (let i = 0; i < n; i++) step(1 / 30); renderer.shadowMap.needsUpdate = true; composer.render(); }, bakeStat };
+if (new URLSearchParams(location.search).has('debug')) window.peach = { cats, makeCat, removeCat, selectCat, PEACH, CAT_LIMIT, BREEDS, specFromBreed, adopt, get selected() { return selected; }, perchClash, floorClash, treeVox, floorVox, THREE, renderer, scene, composer, scrub, perf, ISL, obstacles, cat, command, setEnv, setIsland, travel, env, camera, controls, AU, home, tick: (n = 60) => { for (let i = 0; i < n; i++) step(1 / 30); renderer.shadowMap.needsUpdate = true; composer.render(); }, bakeStat };
 (async () => { // compile all shaders up front (parallel where the GPU driver allows) so neither the first frame nor an island switch stalls
   const t0 = performance.now(); step(1 / 30); // first step builds the environment map, so materials compile in their final form
   renderer.setRenderTarget(composer.renderTarget1); // compile for the composer's off-screen target: that is where the scene is really drawn (no tone mapping there)
