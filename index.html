@@ -358,14 +358,12 @@ vec3 coatPattern(vec3 p,float n,float nn){
     if(uMode==3) c=mix(uC2,uC3,0.6+nn*0.4);
     if(uMode==5) c=mix(uC1,uC3,1.0-smoothstep(-0.25,-0.05,p.y));
     if(uMode==4) c=mix(uC1,uC3,1.0-smoothstep(-0.3,-0.05,p.y));
-  } else if(uCoat==5){ // split calico (hidden breed): white, the top of the head half yellow / half grey, and soft yellow and grey patches on the back
-    float side=smoothstep(-0.025,0.025,p.x+nn*0.05); vec3 pc=mix(uC2,uC3,side); c=uC4;
-    if(uMode==1) c=mix(c,pc,smoothstep(0.07,0.13,p.y+nn*0.05-p.z*0.12)*0.95);
-    if(uMode==2){ float top=smoothstep(-0.04,0.12,p.y+nn*0.12);
-      float y1=1.0-smoothstep(0.13,0.21,length(vec2(p.x+0.08,p.z-0.2))+nn*0.06), g1=1.0-smoothstep(0.14,0.22,length(vec2(p.x-0.1,p.z+0.14))+nn*0.06);
-      float y2=1.0-smoothstep(0.05,0.1,length(vec2(p.x-0.14,p.z-0.26))+nn*0.04), g2=1.0-smoothstep(0.05,0.1,length(vec2(p.x+0.16,p.z+0.32))+nn*0.04);
-      c=mix(c,uC2,max(y1,y2)*top*0.92); c=mix(c,uC3,max(g1,g2)*top*0.88); }
-    if(uMode==4) c=mix(c,p.x<0.0?uC2:uC3,(1.0-smoothstep(0.1,0.18,length(vec2(p.y-0.08,p.z+0.02))+nn*0.06))*0.6);
+  } else if(uCoat==5){ // split calico (hidden breed): white, a cap between the ears and a saddle on the back, each half yellow / half grey
+    float side=smoothstep(-0.025,0.025,p.x+nn*0.04); vec3 pc=mix(uC2,uC3,side); c=uC4;
+    if(uMode==1) c=mix(c,pc,smoothstep(0.13,0.18,p.y+nn*0.04-p.z*0.1)*(1.0-smoothstep(0.11,0.16,ax+nn*0.03))*0.95); // only the crown between the ears
+    if(uMode==2){ float sd=smoothstep(-0.03,0.03,p.x+sin(p.z*6.0)*0.05+nn*0.05); // saddle split down the back, with a gentle wave
+      c=mix(c,mix(uC2,uC3,sd),smoothstep(-0.06,0.08,p.y+nn*0.12)*0.93); }
+    if(uMode==4) c=mix(c,p.x<0.0?uC2:uC3,smoothstep(0.0,0.12,p.y+nn*0.1)*0.8);
   }
   return c;
 }
@@ -1570,7 +1568,7 @@ const BREEDS = {
 // hidden breed: a chubby, round calico (head split yellow / grey) with a pom-pom bobtail and a little bell collar (unlocked by friendship or by luck)
 BREEDS.dango = { name: { zh: '团子三花', en: 'Dango Calico' }, hidden: true, build: 'short', face: { w: 1.14, h: .98, d: .94, ear: .84, earX: 1.12, earY: -.025, earTilt: 1.12 },
   fur: .32, tailR: 1, size: .92, wide: 1.18, bobtail: true, collar: true, eye: 'amber', nose: [0xf3a2ad, 0xc87f8a],
-  coat: coat(5, 0xfbf8f3, 0xefc27c, 0x9a9ca5, 0xfbf8f3, { ear: 0xfbf8f3, earL: 0xefc27c, earR: 0x9a9ca5, earInner: 0xf2bcb4, tuft: 0xfbf8f3, tail: [0xfbf8f3, 0xe9b27e], rim: 0x7a6a62, freckle: 0xe8b8b0, whisker: 0xffffff }) };
+  coat: coat(5, 0xfbf8f3, 0xefc27c, 0x9a9ca5, 0xfbf8f3, { ear: 0xfbf8f3, earInner: 0xf2bcb4, tuft: 0xfbf8f3, tail: [0xfbf8f3, 0xe9b27e], rim: 0x7a6a62, freckle: 0xe8b8b0, whisker: 0xffffff }) };
 const unlocked = new Set();
 const PERSONALITY_INFO = {
   gentle: { zh: '温柔', en: 'Gentle', w: {} }, lazy: { zh: '慵懒', en: 'Lazy', w: { sleep: 2.6, groom: 1.4, yarn: .5, wand: .5, climb: .6, wander: .7 } },
