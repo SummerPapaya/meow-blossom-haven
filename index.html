@@ -1551,6 +1551,7 @@ const EYES = {
   blue: ['#dcefff', '#93c2f2', '#6298dc', '#3a62a4'], deepBlue: ['#d6ecff', '#6fb3f0', '#2f74c8', '#173f86'], copper: ['#fff1c4', '#f2b950', '#d9892a', '#9a5418'],
   gold: ['#fff8d0', '#f5d36a', '#d9a630', '#9a6d14'], amber: ['#fff4cc', '#f2c35c', '#cf8c2a', '#8a5a14'], green: ['#f1fbd6', '#b9e07c', '#79b54a', '#3d7a24'], olive: ['#fbf8d0', '#d6d86a', '#a3ad3a', '#5e6a1c'],
 };
+// other breeds' eyes: socket and iris edge are tinted from the iris itself (no grey-blue ring round amber or green eyes)
 const coat = (type, c1, c2, c3, c4, o = {}) => ({ type, body: { c1, c2, c3, c4 }, mask: { c1, c2, c3, c4 }, ...o });
 const BREEDS = {
   ragdoll: { name: { zh: '布偶猫', en: 'Ragdoll' }, fur: 1, size: 1, eye: 'blue', nose: [0xf2a0b0, 0xc97f90],
@@ -1591,7 +1592,7 @@ const buildOf = B => { // tuxedos come long- or short-haired
 function specFromBreed(breed, name, personality, id) { // a full, JSON-safe spec from a breed preset
   const B = BREEDS[breed] || BREEDS.ragdoll, nm = typeof name === 'string' ? { zh: cleanName(name), en: cleanName(name) } : { zh: cleanName(name && name.zh), en: cleanName(name && name.en) };
   return { id: id || 'c' + Date.now().toString(36) + Math.floor(Math.random() * 1e4), name: nm, breed, personality: PERSONALITY_INFO[personality] ? personality : 'gentle', permanent: false,
-    coat: JSON.parse(JSON.stringify(B.coat)), eye: { ...PEACH.eye, iris: EYES[B.eye].slice() }, nose: { pink: B.nose[0], dark: B.nose[1] }, face: B.face ? { ...B.face } : undefined, wide: B.wide, bobtail: B.bobtail, collar: B.collar, ...buildOf(B) };
+    coat: JSON.parse(JSON.stringify(B.coat)), eye: (ir => ({ ...PEACH.eye, iris: ir, socket: ir[2], outer: ir[2], limbus: ir[3] + '4d', fibre: ir[3] + '26' }))(EYES[B.eye].slice()), nose: { pink: B.nose[0], dark: B.nose[1] }, face: B.face ? { ...B.face } : undefined, wide: B.wide, bobtail: B.bobtail, collar: B.collar, ...buildOf(B) };
 }
 function buildCat(spec, self) {
   const col = spec.coat.body, mask = spec.coat.mask, EY = spec.eye, K = spec.coat.type || 0, tip = spec.coat.tip || 0, SH = spec.build === 'short', FL = spec.fur ?? 1, HL = FL === 1 ? 1 : SH ? .55 : .7, TR = spec.tailR ?? 1, cz = { coat: K, tip }, FC = spec.face; // SH: short-haired model · FC: face shape
@@ -1618,15 +1619,16 @@ function buildCat(spec, self) {
     for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const a0 = j * cols + i, b0 = j * cols + (i + 1) % cols, c0 = a0 + cols, e0 = b0 + cols; idx.push(a0, c0, b0, b0, c0, e0); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setAttribute('aFur', new THREE.Float32BufferAttribute(fur, 1)); g.setIndex(idx); g.computeVertexNormals(); return g; })();
   head.add(furMesh(mergeGeometries([skullGeo, ell(.055, .05, .07, 0, -.035, .258, .45, 12, 8), ...(SH ? [ell(.135, .118, .13, .135, -.075, .07, .9), ell(.135, .118, .13, -.135, -.075, .07, .9)] // short hair: full round jowls instead of a fluffy cheek ruff
-      : [ell(.13, .12, .15, .17, -.11, .02, 2.4), ell(.13, .12, .15, -.17, -.11, .02, 2.4)]), ell(.155, .11, .132, 0, -.082, .25, .4), ell(.092, .076, .074, .062, -.1, .294, .42, 14, 10), ell(.092, .076, .074, -.062, -.1, .294, .42, 14, 10), ell(.075, .05, .06, 0, -.15, .252, .25, 12, 8)]),
+      : [ell(.13, .12, .15, .17, -.11, .02, 2.4), ell(.13, .12, .15, -.17, -.11, .02, 2.4)]), ...(SH ? [ell(.16, .105, .11, 0, -.085, .236, .4), ell(.09, .068, .058, .06, -.1, .27, .42, 14, 10), ell(.09, .068, .058, -.06, -.1, .27, .42, 14, 10), ell(.072, .046, .05, 0, -.148, .24, .25, 12, 8)] // short hair: a flatter muzzle that melts into the round face
+        : [ell(.155, .11, .132, 0, -.082, .25, .4), ell(.092, .076, .074, .062, -.1, .294, .42, 14, 10), ell(.092, .076, .074, -.062, -.1, .294, .42, 14, 10), ell(.075, .05, .06, 0, -.15, .252, .25, 12, 8)])]),
     { ...mask, ...cz, mode: 1, len: .074 * HL, shells: 30, density: 230, thick: 2.5, curl: .22, comb: new V3(0, -.35, -.25) }));
   // eyes
   const makeEyeTex = kind => canvasTex(512, 512, (c, w) => { // detailed iris: gradient, radial fibres, thin limbal ring, big round pupil, catch-lights
-    const cx = w / 2, cy = w / 2, R = w * .4; c.fillStyle = '#6a5c56'; c.fillRect(0, 0, w, w);
-    let g = c.createRadialGradient(cx, cy, R * .9, cx, cy, R * 1.3); g.addColorStop(0, EY.socket); g.addColorStop(1, '#6a5c56'); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R * 1.3, 0, 7); c.fill();
+    const cx = w / 2, cy = w / 2, R = w * (SH ? .44 : .4), OUT = EY.outer || '#6a5c56'; c.fillStyle = OUT; c.fillRect(0, 0, w, w);
+    let g = c.createRadialGradient(cx, cy, R * .9, cx, cy, R * 1.3); g.addColorStop(0, EY.socket); g.addColorStop(1, OUT); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R * 1.3, 0, 7); c.fill();
     g = c.createRadialGradient(cx, cy + R * .18, R * .2, cx, cy, R); g.addColorStop(0, EY.iris[0]); g.addColorStop(.5, EY.iris[1]); g.addColorStop(.84, EY.iris[2]); g.addColorStop(1, EY.iris[3]); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R, 0, 7); c.fill();
     for (let i = 0; i < 170; i++) { const a = Math.random() * PI * 2, r0 = R * (.5 + Math.random() * .12), r1 = R * (.78 + Math.random() * .2); c.strokeStyle = i % 2 ? 'rgba(255,255,255,.17)' : EY.fibre; c.lineWidth = 1 + Math.random() * 1.6; c.beginPath(); c.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0); c.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); c.stroke(); }
-    c.strokeStyle = EY.limbus; c.lineWidth = 7; c.beginPath(); c.arc(cx, cy, R - 2, 0, 7); c.stroke();
+    c.strokeStyle = EY.limbus; c.lineWidth = SH ? 4 : 7; c.beginPath(); c.arc(cx, cy, R - 2, 0, 7); c.stroke();
     const [prx, pry, pcy] = kind === 'slit' ? [.34, .72, -.36] : kind === 'round' ? [.83, .85, -.05] : [.52, .8, -.26]; // day: soft upright oval · dawn/dusk: fuller oval · night: wide and round
     const pupil0 = (gx, gy) => { c.beginPath(); c.ellipse(cx, cy + R * pcy, R * gx, R * gy, 0, 0, 7); }, pupil = (gx, gy) => { pupil0(gx, gy); c.fill(); };
     if (kind !== 'round') { c.strokeStyle = 'rgba(232,244,255,.42)'; c.lineWidth = R * .09; pupil0(prx + .13, pry + .1); c.stroke(); } // pale collarette ring hugging the pupil
@@ -1642,21 +1644,22 @@ function buildCat(spec, self) {
     for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) { const u = i / nu * 2 - 1, v = j / nv * 2 - 1, inner = u * s < 0, pr = Math.pow(1 - u * u, inner ? .95 : .5), x = u * W, y = v * (v > 0 ? HU : HL) * pr + (inner ? -.013 : .007) * u * u; pos.push(x, y, .011 * (1 - u * u) * (1 - v * v * .6)); uv.push(.5 + (x * ca - y * sa) * 8.9, .5 + (x * sa + y * ca) * 8.9); }
     for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { const a = j * (nu + 1) + i, b = a + 1, c2 = a + nu + 1; idx.push(a, b, c2 + 1, a, c2 + 1, c2); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g; };
-  const eyeMat = new THREE.MeshPhysicalMaterial({ map: eyeTex, roughness: .1, clearcoat: 1, clearcoatRoughness: .04, emissive: 0xffffff, emissiveMap: eyeTex, emissiveIntensity: .32 }), rimMat = std(spec.coat.rim, { roughness: 1 });
+  const eyeMat = new THREE.MeshPhysicalMaterial({ map: eyeTex, roughness: .1, clearcoat: 1, clearcoatRoughness: .04, emissive: 0xffffff, emissiveMap: eyeTex, emissiveIntensity: .32 }), rimMat = std(SH ? new THREE.Color(spec.coat.rim).lerp(new THREE.Color(mask.c1), .45).getHex() : spec.coat.rim, { roughness: 1 }); // short hair: a soft lid line, not heavy eyeliner
   const eyes = [-1, 1].map(s => { const e = new THREE.Group(); e.position.set(s * .128, .03, .247); e.rotation.set(0, s * .42, s * .2); e.scale.setScalar(1.02); head.add(e); const eg = eyeGeoFor(s);
-    e.add(new THREE.Mesh(eg, eyeMat)); const rim = new THREE.Mesh(eg, rimMat); rim.scale.set(1.1, 1.2, .6); rim.position.z = -.004; e.add(rim); return e; });
+    e.add(new THREE.Mesh(eg, eyeMat)); const rim = new THREE.Mesh(eg, rimMat); if (SH) rim.scale.set(1.05, 1.09, .6); else rim.scale.set(1.1, 1.2, .6); rim.position.z = -.004; e.add(rim); return e; });
+  const face = new THREE.Group(); face.position.z = SH ? -.024 : 0; head.add(face); // nose, mouth, freckles and whiskers sit on the muzzle (set back on the flatter short-hair muzzle)
   // nose leather, philtrum, mouth, whisker-pad freckles
   { const ns = new THREE.Shape(); ns.moveTo(-.024, .017); ns.quadraticCurveTo(0, .023, .024, .017); ns.quadraticCurveTo(.037, .014, .03, .003); ns.quadraticCurveTo(.012, -.02, 0, -.023); ns.quadraticCurveTo(-.012, -.02, -.03, .003); ns.quadraticCurveTo(-.037, .014, -.024, .017);
     const pink = new THREE.MeshPhysicalMaterial({ color: spec.nose.pink, roughness: .45, clearcoat: .5, clearcoatRoughness: .3, emissive: spec.nose.pink, emissiveIntensity: .28 }), dk = std(spec.nose.dark, { roughness: .6, emissive: spec.nose.dark, emissiveIntensity: .25 });
-    const ng = new THREE.ExtrudeGeometry(ns, { depth: .01, bevelEnabled: true, bevelSize: .004, bevelThickness: .006, bevelSegments: 3, curveSegments: 10 }); const nose = new THREE.Mesh(ng, pink); nose.position.set(0, -.04, .374); nose.rotation.x = -.3; head.add(nose);
-    for (const s of [-1, 1]) { const n = new THREE.Mesh(ell(.0055, .004, .003, 0, 0, 0, 1, 8, 6), dk); n.position.set(s * .013, -.046, .3895); n.rotation.z = s * .5; head.add(n); }
-    const line = pts => head.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 12, .0022, 5), dk));
+    const ng = new THREE.ExtrudeGeometry(ns, { depth: .01, bevelEnabled: true, bevelSize: .004, bevelThickness: .006, bevelSegments: 3, curveSegments: 10 }); const nose = new THREE.Mesh(ng, pink); nose.position.set(0, -.04, .374); nose.rotation.x = -.3; face.add(nose);
+    for (const s of [-1, 1]) { const n = new THREE.Mesh(ell(.0055, .004, .003, 0, 0, 0, 1, 8, 6), dk); n.position.set(s * .013, -.046, .3895); n.rotation.z = s * .5; face.add(n); }
+    const line = pts => face.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 12, .0022, 5), dk));
     line([new V3(0, -.07, .389), new V3(0, -.08, .388), new V3(0, -.089, .385)]);
     for (const s of [-1, 1]) line([new V3(0, -.089, .385), new V3(s * .016, -.1, .386), new V3(s * .034, -.098, .383), new V3(s * .048, -.086, .374)]);
-    const fr = std(spec.coat.freckle, { roughness: 1 }); for (const s of [-1, 1]) for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) { const d = new THREE.Mesh(new THREE.SphereGeometry(.0032, 6, 5), fr); d.position.set(s * (.05 + k * .022), -.083 - r * .013 + k * .003, .381 - k * .012 - r * .002); head.add(d); } }
+    const fr = std(spec.coat.freckle, { roughness: 1 }); for (const s of [-1, 1]) for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) { const d = new THREE.Mesh(new THREE.SphereGeometry(.0032, 6, 5), fr); d.position.set(s * (.05 + k * .022), -.083 - r * .013 + k * .003, .381 - k * .012 - r * .002); face.add(d); } }
   { const wm = new THREE.MeshStandardMaterial({ color: spec.coat.whisker, roughness: 1, transparent: true, opacity: .34 }), parts = []; // hair-thin whiskers: real geometry, so they thin out with distance instead of staying 1 px wide
     for (const s of [-1, 1]) for (let i = 0; i < 3; i++) parts.push(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(new V3(s * .085, -.085 - i * .012, .344), new V3(s * (.27 + i * .015), -.035 - i * .045, .326), new V3(s * (.4 - i * .03), -.1 - i * .08, .19)), 10, .0011, 4));
-    head.add(new THREE.Mesh(mergeGeometries(parts), wm)); }
+    face.add(new THREE.Mesh(mergeGeometries(parts), wm)); }
   // ears
   const earG = withFur(new THREE.ConeGeometry(.165, .285, 16, 1)); earG.scale(1, 1, .45);
   const innerG = new THREE.ConeGeometry(.1, .19, 12); innerG.scale(1, 1, .3);
@@ -1679,10 +1682,10 @@ function buildCat(spec, self) {
     const U = new THREE.Group(), K = new THREE.Group(); L.add(U); U.add(K); let F = null, end = K, endY;
     if (hind) {
       U.add(furMesh(mergeGeometries(SH ? [seg(.1, .27), ell(.145, .21, .2, -Math.sign(x) * .035, -.11, .01, 1.1, 18, 12)] : [seg(.115, .27), ell(.19, .23, .22, 0, -.1, .0, 1.2, 18, 12)]), { ...col, ...cz, mode: 4, len: .07 * HL, shells: 16, density: 160, thick: 2.3, comb: new V3(0, -.3, -.2) }));
-      K.position.y = -.27; F = new THREE.Group(); F.position.y = -.25; K.add(F); K.add(furMesh(seg(.085, .25), white()));
+      K.position.y = -.27; F = new THREE.Group(); F.position.y = -.25; K.add(F); K.add(furMesh(SH ? mergeGeometries([seg(.085, .25), ell(.1, .13, .11, 0, -.02, -.01, 1, 14, 10)]) : seg(.085, .25), white())); // short hair: the knee eases from thigh to shin
       F.add(furMesh(mergeGeometries([seg(.07, .14), pawGeo(-.16)]), white())); end = F; endY = -.19;
     } else {
-      U.add(furMesh(seg(.108, .3), white())); K.position.y = -.3;
+      U.add(furMesh(SH ? mergeGeometries([seg(.1, .3), ell(.122, .17, .14, -Math.sign(x) * .02, -.03, -.01, 1, 16, 10)]) : seg(.108, .3), white())); K.position.y = -.3; // short hair: a shoulder that swells out of the chest and tapers into the leg
       K.add(furMesh(mergeGeometries([seg(.09, .27), pawGeo(-.29)]), white())); endY = -.32;
     }
     for (const k of [-1, 0, 1]) { const claw = new THREE.Mesh(new THREE.ConeGeometry(.0075, .034, 6), clawM); claw.position.set(k * .045, endY - .012, .222 - Math.abs(k) * .012); claw.rotation.x = PI / 2 + .45; end.add(claw); } // translucent cream claws
