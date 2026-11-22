@@ -1695,9 +1695,10 @@ function buildCat(spec, self) {
   // big plume tail
   const tailBase = new THREE.Group(); tailBase.position.set(0, .12, -.2); pivot.add(tailBase);
   const segs = []; let parent = tailBase;
-  (spec.bobtail ? [.1, .115] : SH ? [.075, .072, .068, .064, .06, .055, .048] : [.1, .125, .145, .155, .15, .13, .1]).forEach((r, i) => { // short hair: a slim tapering tail, not a plume
+  (spec.bobtail ? [.1, .115] : SH ? [.072, .068, .064, .06, .055, .05, .043] : [.1, .125, .145, .155, .15, .13, .1]).forEach((r, i, arr) => { // short hair: a slim tapering tail, not a plume
     const g = new THREE.Group(); g.position.z = i ? -.15 : -.05; parent.add(g);
-    g.add(furMesh(ell(r * TR, r * TR, r * 1.15 * TR, 0, 0, 0, 1, 14, 10), { c1: spec.coat.tail[0], c2: spec.coat.tail[1], ...(K ? { c3: col.c3, c4: col.c4 } : {}), ...cz, mode: 3, len: .27 * FL, shells: 30, density: 150, thick: 2.5, curl: .34, comb: new V3(0, -.2, -.3) }));
+    const sm = SH && !spec.bobtail, n = arr.length; // short hair: each piece is a capsule reaching the next joint, so the pieces overlap into one smooth, tapering tube
+    g.add(furMesh(sm ? (() => { const L = i < n - 1 ? .15 : .06, q = withFur(new THREE.CapsuleGeometry(r * TR, L, 8, 14)); q.rotateX(PI / 2); q.translate(0, 0, -L / 2); return q; })() : ell(r * TR, r * TR, r * 1.15 * TR, 0, 0, 0, 1, 14, 10), { c1: spec.coat.tail[0], c2: spec.coat.tail[1], ...(K ? { c3: col.c3, c4: col.c4 } : {}), ...cz, mode: 3, len: .27 * FL, shells: 30, density: 150, thick: 2.5, curl: .34, comb: new V3(0, -.2, -.3) }));
     segs.push(g); parent = g;
   });
   if (spec.collar) { // soft red collar with a tiny gold bell, around the neck
