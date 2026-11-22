@@ -1763,17 +1763,19 @@ function exitSteps() {
     case 'tree1': return [jump(S0, 'floor')];
   } return [];
 }
+const offBed = () => cat.loc === 'floor' && nearBed(cat.root.position) ? [walk(randFree())] : []; // lying down for a groom or a brush: step away from the bed first
+const nearBed = p => Math.hypot(p.x - BED.x, p.z - BED.z) < 2.6; // resting spots keep clear of the bed (the ocean shell and its rim reach well past the bed's walking radius)
 function randFree() {
-  for (let i = 0; i < 50; i++) { const a = rnd(PI * 2), r = Math.sqrt(Math.random()) * (ROAM - 1), p = new V3(Math.cos(a) * r, 0, Math.sin(a) * r); if (obstacles.every(o => Math.hypot(p.x - o.x, p.z - o.z) > o.r + .55)) return p; }
+  for (let i = 0; i < 50; i++) { const a = rnd(PI * 2), r = Math.sqrt(Math.random()) * (ROAM - 1), p = new V3(Math.cos(a) * r, 0, Math.sin(a) * r); if (!nearBed(p) && obstacles.every(o => Math.hypot(p.x - o.x, p.z - o.z) > o.r + .55)) return p; }
   return new V3(0, 0, 1);
 }
 const zzz = (dt) => { cat.zT -= dt; if (cat.zT < 0) { cat.zT = 1.3; fx(zTex, headPos().add(new V3(.2, .35, 0)), new V3(.25, .5, 0), 2.2, .3); } };
 const BEH = {
   wander: { w: 30, label: '猪猪正在散步 🐾', steps: () => [walk(randFree()), wait(rnd(2.5, 5), pick(['sit', 'stand', 'loaf', 'sit']))] },
-  groom:  { w: 14, label: '猪猪在舔毛 ✨', steps: () => [wait(rnd(5, 8), 'sit', { tick: () => cat.groom = 1 })] },
+  groom:  { w: 14, label: '猪猪在舔毛 ✨', steps: () => [...offBed(), wait(rnd(5, 8), 'sit', { tick: () => cat.groom = 1 })] },
   sleep:  { w: 10, label: '猪猪睡着了 💤', steps: () => { const b = BEDS[env.island]; return b.walk ? [walk(bedFront), walk(b.c, { free: true, pose: 'crawl', loc: 'bed' }), face(bedFront), wait(rnd(16, 26), 'sleep', { tick: zzz })] : [walk(bedFront), jump(b.c, 'bed'), wait(rnd(16, 26), 'sleep', { tick: zzz })]; } },
   potty:  { w: 6, label: '猪猪在上厕所… 🙈', steps: () => [walk(litterFront), call(() => cat.lock = true), jump(litterC), wait(4.5, 'sit', { tick: (dt) => { cat.phase += dt * 9; cat.moving = .35; } }), call(() => { addClump(); AU.swish(); }), wait(.5, 'stand'), jump(litterFront), call(() => cat.lock = false)] },
-  brush:  { w: 0, label: '猪猪在享受梳毛 🪮', steps: () => [wait(.6, 'sit'), wait(8, 'loaf', { tick: brushTick }), wait(1, 'sit')] },
+  brush:  { w: 0, label: '猪猪在享受梳毛 🪮', steps: () => [...offBed(), wait(.6, 'sit'), wait(8, 'loaf', { tick: brushTick }), wait(1, 'sit')] },
   climb:  { w: 12, label: '猪猪在爬花花猫爬架 🌼', steps: () => [walk(S0), jump(P1, 'tree1'), wait(.7, 'stand'), jump(P2, 'tree2'), wait(.7, 'stand'), jump(P3, 'tree3'), wait(rnd(9, 15), 'sit'), wait(rnd(4, 8), 'loaf')] },
   tunnel: { w: 10, label: '猪猪在钻隧道 🌈', steps: () => {
       const rev = Math.random() < .5, pts = rev ? [...tunPath].reverse() : tunPath, a = rev ? tunB : tunA, b = rev ? tunA : tunB;
