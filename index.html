@@ -6,7 +6,7 @@
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Meow Blossom Haven · 喵喵浮岛花境</title>
-<meta name="description" content="A dreamy, interactive 3D home for Peach the ragdoll cat and friends: adopt cats and explore five floating islands. 布偶猫猪猪和小伙伴们的梦幻 3D 浮空岛。">
+<meta name="description" content="A dreamy, interactive 3D home for Peach the ragdoll cat and friends: invite cat friends over and explore five floating islands. 布偶猫猪猪和小伙伴们的梦幻 3D 浮空岛。">
 <meta name="theme-color" content="#2a1f63">
 <link rel="canonical" href="https://meow-blossom-haven.summercommences.com/">
 <link rel="icon" href="favicon.ico" sizes="32x32">
@@ -15,7 +15,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Meow Blossom Haven">
 <meta property="og:title" content="Meow Blossom Haven · 喵喵浮岛花境">
-<meta property="og:description" content="A dreamy, interactive 3D home for Peach the ragdoll cat and friends: adopt cats and explore five floating islands. 布偶猫猪猪和小伙伴们的梦幻 3D 浮空岛。">
+<meta property="og:description" content="A dreamy, interactive 3D home for Peach the ragdoll cat and friends: invite cat friends over and explore five floating islands. 布偶猫猪猪和小伙伴们的梦幻 3D 浮空岛。">
 <meta property="og:url" content="https://meow-blossom-haven.summercommences.com/">
 <meta property="og:image" content="https://meow-blossom-haven.summercommences.com/assets/og.png?v=6">
 <meta property="og:image:type" content="image/png">
@@ -1843,6 +1843,7 @@ function catSeparate(dt) { // bodies never overlap: 5 points along each spine; a
       if (d < R) { const m = (R - d) * (cat.moving && !o.moving ? 1 : !cat.moving && o.moving ? .15 : .5); if (d > 1e-4) { px += dx / d * m; pz += dz / d * m; } else px += m; }
     }
   }
+  const v = cat.sepV || (cat.sepV = [0, 0]), k = 1 - Math.exp(-dt * 14); v[0] += (px - v[0]) * k; v[1] += (pz - v[1]) * k; px = v[0]; pz = v[1]; // smoothed: a cat squeezed between two others drifts out, no left-right flicker
   const L = Math.hypot(px, pz), lim = 2.6 * dt; if (L > lim) { px *= lim / L; pz *= lim / L; } me.x += px; me.z += pz; // ease apart (≤ 2.6 m/s) instead of jumping
 }
 function catPen(px, pz) { // how deep this cat would sit inside the others if it stood at (px, pz)
@@ -2001,19 +2002,24 @@ function updateCat(dt, t) {
           if (!s.lp) { s.lp = pos.clone(); s.st = 0; } else if ((s.st += dt) > .9) { if (Math.hypot(pos.x - s.lp.x, pos.z - s.lp.z) < .25) { s.n = (s.n || 0) + 1; s.path = undefined; if (s.n > 2 && giveUp()) return; } s.lp.copy(pos); s.st = 0; }
         }
         if (cats.length > 1 && !s.free && !run) [mx, mz] = catAvoid(mx, mz);
-        if (!run && d > .45) { if (!s.dir) s.dir = [mx, mz]; else { const k = 1 - Math.exp(-dt * 5); let ux = s.dir[0] + (mx - s.dir[0]) * k, uz = s.dir[1] + (mz - s.dir[1]) * k, L = Math.hypot(ux, uz); if (L > .05) { s.dir = [ux / L, uz / L]; } [mx, mz] = s.dir; } } // smooth heading: steering corrections no longer flip-flop frame to frame
+        if (d > .45) { if (!s.dir) s.dir = [mx, mz]; else { const k = 1 - Math.exp(-dt * (run ? 9 : 5)); let ux = s.dir[0] + (mx - s.dir[0]) * k, uz = s.dir[1] + (mz - s.dir[1]) * k, L = Math.hypot(ux, uz); if (L > .05) { s.dir = [ux / L, uz / L]; } [mx, mz] = s.dir; } } // smooth heading: steering corrections no longer flip-flop frame to frame
         const da = angDiff(Math.atan2(mx, mz), cat.yaw); cat.yaw += clamp(da, -6 * dt, 6 * dt);
         const sp = (s.speed || (run ? 2.7 : 1.25)) * (Math.abs(da) < 1 ? 1 : .3) * (run ? clamp((d - stop) / .6 + .35, .35, 1) : 1), st = Math.min(sp * dt, d); // ease in on the ball instead of overshooting round it
-        const ox = pos.x, oz = pos.z, guard = cat.loc === 'floor' && !s.free, fg = guard && floorVox[env.island], cg = guard && cats.length > 1; let c0 = 0, p0 = 0;
+        const ox = pos.x, oz = pos.z, guard = cat.loc === 'floor', fg = guard && !s.free && floorVox[env.island], cg = guard && cats.length > 1; let c0 = 0, p0 = 0; // pass-through walks (bed, tunnel, door) still give way to other cats
         if (fg) { cat.root.worldToLocal(cat.head.getWorldPosition(_hl)); c0 = floorClash(pos); }
         if (cg) p0 = catPen(ox, oz);
         pos.x += mx * st; pos.z += mz * st; if (!s.free) collide(pos, cat.yaw, tgt);
-        const worse = q => (fg && floorClash(q) > c0) || (cg && catPen(q.x, q.z) > p0 + 1e-4);
-        if (guard && worse(pos)) { // this step would push into furniture or another cat (and get shoved back next frame: the jitter): slide along, or wait
-          let ok = false; const sd = s.side || 1; for (const a of [.5, -.5, 1, -1, 1.5, -1.5]) { const b = a * sd, ca = Math.cos(b), sa = Math.sin(b); _fp.set(ox + (mx * ca + mz * sa) * st, pos.y, oz + (mz * ca - mx * sa) * st); if (!worse(_fp)) { pos.x = _fp.x; pos.z = _fp.z; s.side = Math.sign(b); ok = true; break; } } // keep sliding the same way round, no zigzag
-          if (!ok) { pos.x = ox; pos.z = oz; } }
+        const hitF = q => fg && floorClash(q) > c0, hitC = q => cg && catPen(q.x, q.z) > p0 + 1e-4, worse = q => hitF(q) || hitC(q);
+        if (s.hold > 0) { s.hold -= dt; pos.x = ox; pos.z = oz; cat.moving = 0; } // giving way to another cat for a moment
+        else if (guard && worse(pos)) { // this step would push into furniture or another cat (and get shoved back next frame: the jitter)
+          if (run) { pos.x = ox; pos.z = oz; } // chasing the ball: just wait for it to roll clear, no darting sideways
+          else if (!hitF(pos) && !s.yielded) { s.hold = .55; s.yielded = 1.5; pos.x = ox; pos.z = oz; cat.moving = 0; } // a cat in the way: stop and let it pass first
+          else { let ok = false; const sd = s.side || 1; for (const a of [.5, -.5, 1, -1, 1.5, -1.5]) { const b = a * sd, ca = Math.cos(b), sa = Math.sin(b), nx = mx * ca + mz * sa, nz = mz * ca - mx * sa; _fp.set(ox + nx * st, pos.y, oz + nz * st);
+              if (!worse(_fp)) { pos.x = _fp.x; pos.z = _fp.z; s.side = Math.sign(b); ok = true; break; } } // slide round, always the same way (no zigzag)
+            if (!ok) { pos.x = ox; pos.z = oz; } } }
+        else if (s.yielded) s.yielded = Math.max(0, s.yielded - dt);
         if (!s.wp) { s.wp = pos.clone(); s.wt = 0; } else if ((s.wt += dt) > 3) { if (Math.hypot(pos.x - s.wp.x, pos.z - s.wp.z) < .3 && giveUp()) return; s.wp.copy(pos); s.wt = 0; } // watchdog: 3 s with no headway (also on pass-through walks that something keeps pushing back)
-        cat.phase += st * 5.4; cat.moving = 1;
+        { const mv = Math.hypot(pos.x - ox, pos.z - oz); cat.phase += mv * 5.4; cat.moving = mv > 1e-4 ? 1 : 0; } // paws only move when the body does
       }
     } else if (s.type === 'jump') {
       if (!s.from) { s.from = pos.clone(); { const hx = s.to.x - pos.x, hz = s.to.z - pos.z, hl = Math.hypot(hx, hz); if (s.loc && s.loc !== 'floor' && hl > .3) { s.to = s.to.clone(); s.to.x -= hx / hl * .5; s.to.z -= hz / hl * .5; } } // land with the body, not the hips, over the middle of a perch
@@ -2305,7 +2311,7 @@ function adopt(o) {
   const spot = SPAWN.find(q => cats.every(c => Math.hypot(c.root.position.x - q.x, c.root.position.z - q.z) > 1.2)) || SPAWN[cats.length % SPAWN.length];
   return makeCat(specFromBreed(o.breed, o.name, o.personality, o.id), spot.clone(), Math.random() * PI * 2);
 }
-let removing = null, removeT = 0; // the cat whose 去旅行 button is waiting for a second tap (去旅行: the cat sets off on a trip)
+let removing = null, removeT = 0; // the cat whose 好朋咪回家啦 button is waiting for a second tap (the friend goes home and can be invited again)
 let catForm = null; // the adopt form's state while it is open
 const randomForm = () => { const n = pick(CAT_NAMES), lucky = Math.random() < .05, open = Object.keys(BREEDS).filter(k => !BREEDS[k].hidden || unlocked.has(k)); return { breed: lucky ? 'dango' : pick(open), lucky, personality: pick(Object.keys(PERSONALITY_INFO)), name: lang === 'en' ? n[1] : n[0], pair: n }; }; // a suggested name keeps both languages
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -2323,14 +2329,14 @@ function renderCatPanel() {
     const ph = el('button', 'cp-btn', '📷'); ph.title = tr({ zh: '拍照', en: 'Photo' }); ph.addEventListener('click', e => { e.stopPropagation(); selectCat(c); toggleCatPanel(false); takePhoto(c); }); row.appendChild(ph);
     row.addEventListener('click', () => { focusCat(c); renderCatPanel(); });
     if (!c.spec.permanent) { // two taps, confirmed right in the row (browser confirm dialogs can be blocked in embedded web views)
-      const sure = removing === c, rm = el('button', 'cp-btn' + (sure ? ' warn' : ''), tr(sure ? { zh: '确定出发？', en: 'Off it goes?' } : { zh: '去旅行', en: 'Send on a trip' }));
-      rm.addEventListener('click', e => { e.stopPropagation(); if (removing === c) { removing = null; removeCat(c); saveCats(); setStatus({ zh: `${c.spec.name.zh}背上小包去旅行啦 🧳 一路顺风～`, en: `${c.spec.name.en} packed a little bag and set off on a trip 🧳` }); } else { removing = c; clearTimeout(removeT); removeT = setTimeout(() => { removing = null; renderCatPanel(); }, 4000); } renderCatPanel(); });
+      const sure = removing === c, rm = el('button', 'cp-btn' + (sure ? ' warn' : ''), tr(sure ? { zh: '确定送它回家？', en: 'Head home?' } : { zh: '好朋咪回家啦', en: 'Time to go home' }));
+      rm.addEventListener('click', e => { e.stopPropagation(); if (removing === c) { removing = null; removeCat(c); saveCats(); setStatus({ zh: `${c.spec.name.zh}回家啦，下次再来玩 👋`, en: `${c.spec.name.en} headed home. Come again soon 👋` }); } else { removing = c; clearTimeout(removeT); removeT = setTimeout(() => { removing = null; renderCatPanel(); }, 4000); } renderCatPanel(); });
       row.appendChild(rm); }
     P.appendChild(row);
   }
   if (!catForm) {
     const r = el('div', 'cp-row'); r.appendChild(el('span', 'cp-note', tr({ zh: `最多 ${CAT_LIMIT} 只猫咪同时在小屋`, en: `Up to ${CAT_LIMIT} cats at a time` })));
-    const add = el('button', 'cp-btn main', tr({ zh: '＋ 领养一只小猫', en: '＋ Adopt a cat' })); add.disabled = cats.length >= CAT_LIMIT;
+    const add = el('button', 'cp-btn main', tr({ zh: '＋ 邀请好朋咪来做客', en: '＋ Invite a friend over' })); add.disabled = cats.length >= CAT_LIMIT;
     add.addEventListener('click', () => { catForm = { breed: 'ragdoll', personality: 'gentle', name: '' }; renderCatPanel(); }); r.appendChild(add); P.appendChild(r); return;
   }
   const f = catForm, sec = t => P.appendChild(el('div', 'cp-sec', tr(t)));
@@ -2344,14 +2350,14 @@ function renderCatPanel() {
   sec({ zh: '性格', en: 'Personality' }); const pw = el('div');
   for (const k in PERSONALITY_INFO) { const ch = el('button', 'cp-chip' + (f.personality === k ? ' on' : ''), tr(PERSONALITY_INFO[k])); ch.addEventListener('click', () => { f.personality = k; renderCatPanel(); }); pw.appendChild(ch); }
   P.appendChild(pw);
-  const r = el('div', 'cp-row'), cancel = el('button', 'cp-btn', tr({ zh: '取消', en: 'Cancel' })), rand = el('button', 'cp-btn', tr({ zh: '🎲 全部随机', en: '🎲 Surprise me' })), ok = el('button', 'cp-btn main', tr({ zh: '领养', en: 'Adopt' }));
+  const r = el('div', 'cp-row'), cancel = el('button', 'cp-btn', tr({ zh: '取消', en: 'Cancel' })), rand = el('button', 'cp-btn', tr({ zh: '🎲 全部随机', en: '🎲 Surprise me' })), ok = el('button', 'cp-btn main', tr({ zh: '发出邀请', en: 'Invite' }));
   cancel.addEventListener('click', () => { catForm = null; renderCatPanel(); });
   rand.addEventListener('click', () => { catForm = randomForm(); if (catForm.lucky) unlockBreed('dango'); renderCatPanel(); });
   ok.addEventListener('click', () => {
     if (cats.length >= CAT_LIMIT) return;
     const nm = cleanName(f.name), pr = f.pair || pick(CAT_NAMES), name = f.pair || !nm ? { zh: pr[0], en: pr[1] } : nm;
     if (BREEDS[f.breed].hidden && !unlocked.has(f.breed)) return; const c = adopt({ breed: f.breed, personality: f.personality, name }); catForm = null; if (!c) return;
-    saveCats(); focusCat(c); setStatus({ zh: `${c.spec.name.zh} 来到了小屋 🐾`, en: `${c.spec.name.en} moved into the haven 🐾` }); toggleCatPanel(false);
+    saveCats(); focusCat(c); setStatus({ zh: `${c.spec.name.zh} 来做客啦 🐾`, en: `${c.spec.name.en} came over to visit 🐾` }); toggleCatPanel(false);
   });
   r.appendChild(el('span', 'cp-note')); r.appendChild(cancel); r.appendChild(rand); r.appendChild(ok); P.appendChild(r);
 }
