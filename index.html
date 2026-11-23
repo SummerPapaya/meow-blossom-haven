@@ -1591,8 +1591,8 @@ BREEDS.dango = { name: { zh: '团子三花', en: 'Dango Calico' }, hidden: true,
 const DOGS = {
   labWhite: { name: { zh: '拉布拉多', en: 'Labrador' }, build: 'short', fur: .4, tailR: 1, size: 1.55, eye: 'dogDeep', nose: [0x2a221f, 0x17110f],
     dog: { cheekS: .76, legK: 1.36, legW: .98, bodyW: 1.12, chestK: 1.34, bodyL: 1.1, belly: 1.3, headY: .52, headZ: 1.16, headS: 1.16, skullW: 1.02, snout: [.1, .08, .165], flews: true, noseS: .66, eyeS: .76, eyeW: 1.22, smile: 1.15, mouthY: -.03, eyeTilt: .24, earS: 1.36, earY: .15,
-      neck: [.2, .21, .2, -.8, .24, .6], ear: 'tri', tail: 'otter', tailSegs: [.088, .078, .068, .058, .049, .04, .03], tailStep: .115, tailFur: .02,
-      fur: .017, curl: .04, faceFur: .9, legFur: .95, density: 300, thick: 2, shells: 16, eyeX: .1, eyeY: .055, eyeZ: .14, tailPose: { raise: -1.3, curl: -.05 } },
+      neck: [.2, .21, .2, -.8, .24, .6], ear: 'tri', tail: 'otter', tailSegs: [.085, .088, .087, .083, .076, .066, .052], tailStep: .115, tailFur: .055,
+      fur: .017, curl: .04, faceFur: .9, legFur: .95, density: 300, thick: 2, shells: 16, eyeX: .1, eyeY: .055, eyeZ: .14, tailPose: { raise: -1.3, curl: -.05, walkUp: .75, tipUp: .2 } },
     coat: coat(1, 0xf0e2c6, 0xe6d3b0, 0xcfb58e, 0xf6ecd8, { ear: 0xe8d6b6, earInner: 0xe8b7a8, tuft: 0xf3e8d3, tail: [0xf3e8d3, 0xe9dabf], rim: 0x3a2c26, freckle: 0xd8c4a6, whisker: 0xffffff }) },
   shiba: { name: { zh: '柴犬', en: 'Shiba Inu' }, build: 'short', fur: .5, tailR: 1, size: 1, eye: 'dogDark', nose: [0x231a17, 0x140e0c],
     dog: { legK: 1.1, legW: 1, bodyW: .98, chestK: 1, headY: .45, headZ: 1.13, headS: 1.3, bodyL: .88, skullW: 1.1, snout: [.082, .062, .12], noseS: .64, eyeS: .66, eyeTilt: .3, smile: 1.3, cheekS: 1.05, neck: [.16, .17, .18, -.5, .2, .6], ear: 'erect', tail: 'curl', tailSegs: [.074, .078, .076, .07, .062, .05], tailStep: .1, tailFur: .075,
@@ -2255,8 +2255,9 @@ function updateCat(dt, t) {
     if (u.F) u.F.rotation.x = u.r2 - lift * .3 - sw * .12;
   }
   const dt_ = cat.dogTail, wag = cat.happy > 0 ? (dt_ ? 4.2 : 2.2) : dt_ ? 1.6 + cat.walkAmt : 1; // dogs wag more, and a lot more when happy
-  cat.tailBase.rotation.set(-pitch + P.tailRaise + (dt_ ? dt_.raise * (asleep ? .3 : 1) : 0) + Math.sin(t * 1.1) * .05, Math.sin(t * 1.3 * wag) * .14 * (dt_ ? Math.min(wag, 2.4) : wag), 0);
-  cat.segs.forEach((g, i) => g.rotation.set(P.tailCurl + (dt_ ? dt_.curl : 0) + Math.sin(t * 1.5 - i * .5) * .03, (dt_ ? P.tailYaw * .3 : P.tailYaw) + Math.sin(t * 1.7 * wag - i * .55) * .07 * (dt_ ? Math.min(wag, 2) : wag), 0));
+  const up = dt_ && dt_.walkUp ? Math.max(cat.walkAmt, cat.happy > 0 ? 1 : 0) : 0; // Labrador: walking or wagging lifts the tail and the tip curls up
+  cat.tailBase.rotation.set(-pitch + P.tailRaise + (dt_ ? dt_.raise * (asleep ? .3 : 1) + up * (dt_.walkUp || 0) : 0) + Math.sin(t * 1.1) * .05, Math.sin(t * 1.3 * wag) * .14 * (dt_ ? Math.min(wag, 2.4) : wag), 0);
+  cat.segs.forEach((g, i) => g.rotation.set(P.tailCurl + (dt_ ? dt_.curl + up * (dt_.tipUp || 0) * (i / cat.segs.length) : 0) + Math.sin(t * 1.5 - i * .5) * .03, (dt_ ? P.tailYaw * .3 : P.tailYaw) + Math.sin(t * 1.7 * wag - i * .55) * .07 * (dt_ ? Math.min(wag, 2) : wag), 0));
   if (cat.tongue) cat.tongue.visible = cat.happy > 0 || (cat.walkAmt > .5 && cat.moving && (cat.step && cat.step.speed > 2)); // panting when happy or running
   if (cat.skins) for (const f of cat.skins) f(); // dogs: re-skin the leg and tail tubes to this frame's joints
   cat.blob.position.set(pos.x, pos.y + .04, pos.z); cat.blob.material.opacity = cat.airT ? .25 : .8;
