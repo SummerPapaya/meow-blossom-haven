@@ -319,7 +319,7 @@ void main(){
   gl_Position=projectionMatrix*viewMatrix*w;
 }`;
 const FUR_F = /* glsl */`
-uniform vec3 uC1,uC2,uC3,uC4,uLightDir,uLightCol,uSky,uGround; uniform int uMode,uCoat; uniform float uDensity,uThick,uTip,uCoil;
+uniform vec3 uC1,uC2,uC3,uC4,uLightDir,uLightCol,uSky,uGround; uniform int uMode,uCoat; uniform float uDensity,uThick,uTip,uCoil; uniform vec4 uMouth,uMouth2; uniform vec3 uMouthC;
 varying float vH; varying vec3 vBase; varying vec3 vN; varying vec3 vW;
 float hash(vec3 p){p=fract(p*vec3(.1031,.1030,.0973));p+=dot(p,p.yxz+33.33);return fract((p.x+p.y)*p.z);}
 float vnoise(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);
@@ -416,6 +416,13 @@ void main(){
     if(alpha<0.03) discard;
   }
   vec3 base=pattern(vBase)*(0.93+0.14*r)*coilSh;
+  if(uMouth.x>0.0&&uMode==1&&vBase.z>uMouth.w){ // a dog's mouth, painted into the muzzle fur: centre line from the nose down, then a smile out to each cheek
+    float ax=abs(vBase.x), t=ax/uMouth.x, th=uMouth2.x;
+    float ys=uMouth.y-uMouth2.y*4.0*t*(1.0-t)+uMouth2.z*t*t;
+    float sm=t<1.0?1.0-smoothstep(th*0.5,th,abs(vBase.y-ys)):0.0;
+    float mid=(1.0-smoothstep(th*0.5,th,ax))*step(vBase.y,uMouth.z)*step(uMouth.y,vBase.y);
+    base=mix(base,uMouthC,max(sm,mid)*0.92);
+  }
   if(uTip>0.0){ float top=uMode==2?smoothstep(-0.25,0.2,vBase.y):(uMode==1?smoothstep(-0.05,0.15,vBase.y):0.7); base=mix(base,uC3,smoothstep(0.35,1.0,vH)*smoothstep(0.35,1.0,vH)*uTip*top); } // shaded: dark hair tips
   base=mix(base*0.9,base*1.06+0.015,vH);
   float occ=mix(0.86,1.0,pow(max(vH,0.),0.6));
@@ -430,7 +437,7 @@ function furMat(o) {
   return new THREE.ShaderMaterial({
     uniforms: {
       ...furShared, uShells: { value: o.shells }, uLen: { value: o.len }, uComb: { value: o.comb || new V3(0, -.3, 0) },
-      uMode: { value: o.mode || 0 }, uCoat: { value: o.coat || 0 }, uTip: { value: o.tip || 0 }, uCurl: { value: o.curl ?? .16 }, uCoil: { value: o.coil || 0 }, uDensity: { value: o.density || 40 }, uThick: { value: o.thick || 1.75 },
+      uMode: { value: o.mode || 0 }, uCoat: { value: o.coat || 0 }, uTip: { value: o.tip || 0 }, uCurl: { value: o.curl ?? .16 }, uCoil: { value: o.coil || 0 }, uMouth: { value: o.mouth || new THREE.Vector4() }, uMouth2: { value: o.mouth2 || new THREE.Vector4() }, uMouthC: { value: new THREE.Color(o.mouthC ?? 0x000000) }, uDensity: { value: o.density || 40 }, uThick: { value: o.thick || 1.75 },
       uC1: { value: new THREE.Color(o.c1 ?? 0xffffff) }, uC2: { value: new THREE.Color(o.c2 ?? 0xffffff) },
       uC3: { value: new THREE.Color(o.c3 ?? 0xffffff) }, uC4: { value: new THREE.Color(o.c4 ?? 0xffffff) },
     }, vertexShader: FUR_V, fragmentShader: FUR_F, alphaToCoverage: true,
@@ -1796,14 +1803,16 @@ function buildDog(spec, self) {
   if (D.flews) for (const q of [-1, 1]) hp.push({ e: [sw * .48, sh * .62, sl * .45, q * sw * .5, -.1, .13 + sl * .62] }); // a Labrador's soft lips
   // short fur on the muzzle (muzzleFur), and the mouth line sits on the skin just out through it (see on())
   const hg = smoothBlob(hp, [0, -.02, .05], .09, { w: 72, h: 52, reach: 1, fur: (x, y, z) => 1 - (1 - (D.muzzleFur ?? .35)) * clamp((z - (.04 + sl * .2)) / .06, 0, 1) * clamp((.03 - y) / .05, 0, 1) }), hsdf = hg.userData.sdf, FF = FL * (D.faceFur ?? .8);
-  head.add(furMesh(hg, coatO(1, FF, { comb: new V3(0, -.2, -.5) })));
+  const W_ = D.smile || 1, mY = -.084 + (D.mouthY || 0), nB = -.03 + sh * .25 - sh * .5 * (D.noseS ?? 1) * .9;
+  const mouthU = D.mouth === false ? {} : { mouth: new THREE.Vector4(sw * .92 * W_, mY, nB, .12 + sl * .1), mouth2: new THREE.Vector4(.0075, .012 + .004 * W_, W_ > 1 ? .02 * W_ : .006, 0), mouthC: spec.nose.dark };
+  head.add(furMesh(hg, coatO(1, FF, { comb: new V3(0, -.2, -.5), ...mouthU }))); // the mouth is painted into the fur (never floats off the face)
   const skinZ = (x, y) => { let z = .7; while (z > -.2 && hsdf(x, y, z) > 0) z -= .004; return z; }; // front of the skin at (x, y)
   mz = skinZ(0, -.03 + sh * .25) - .02 + FF * (D.muzzleFur ?? .35) * .5; // the nose sits on the muzzle tip, just proud of the fur
   const dark = std(spec.nose.dark, { roughness: .35, emissive: spec.nose.dark, emissiveIntensity: .12 });
   { const NS = D.noseS ?? 1, n = add(head, ell(sw * .62 * NS, sh * .5 * NS, .035 * NS, 0, 0, 0, 1, 18, 12), new THREE.MeshPhysicalMaterial({ color: spec.nose.pink, roughness: .5, clearcoat: .3, clearcoatRoughness: .45 })); n.position.set(0, -.03 + sh * .25, mz + .02); n.castShadow = false;
     for (const s of [-1, 1]) { const h = add(head, ell(.011 * NS, .007 * NS, .006), dark, s * sw * .28 * NS, -.035 + sh * .2, mz + .02 + .03 * NS); h.rotation.z = s * .6; h.castShadow = false; } // nostrils
     const tube = pts => add(head, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, .003, 5), dark).castShadow = false, on = (x, y, raw) => { if (!raw) y += D.mouthY || 0; const z = skinZ(x, y), e = .003; let nx = hsdf(x + e, y, z) - hsdf(x - e, y, z), ny = hsdf(x, y + e, z) - hsdf(x, y - e, z), nz = hsdf(x, y, z + e) - hsdf(x, y, z - e); const L = Math.hypot(nx, ny, nz) || 1, o = FF * (D.muzzleFur ?? .35) * .6 + .004; return new V3(x + nx / L * o, y + ny / L * o, z + nz / L * o); }, noseBot = -.03 + sh * .25 - sh * .5 * (D.noseS ?? 1) * .9; // the mouth's centre line starts at the bottom of the nose // mouthY: a lower lip line (Labrador) // mouth lines drawn on the skin, just proud of the fur
-    if (D.mouth !== false) { const W = D.smile || 1; { const m = -.084 + (D.mouthY || 0); tube([on(0, noseBot, 1), on(0, (noseBot + m) / 2, 1), on(0, m, 1)]); } for (const s of [-1, 1]) tube(W > 1 ? [on(0, -.084), on(s * sw * .28 * W, -.1), on(s * sw * .55 * W, -.097), on(s * sw * .78 * W, -.084), on(s * sw * .88 * W, -.07)] : [on(0, -.084), on(s * sw * .2, -.092), on(s * sw * .38, -.095), on(s * sw * .52, -.089)]); } } // W > 1: a wide smile whose corners turn up (Shiba)
+    if (false) { const W = D.smile || 1; { const m = -.084 + (D.mouthY || 0); tube([on(0, noseBot, 1), on(0, (noseBot + m) / 2, 1), on(0, m, 1)]); } for (const s of [-1, 1]) tube(W > 1 ? [on(0, -.084), on(s * sw * .28 * W, -.1), on(s * sw * .55 * W, -.097), on(s * sw * .78 * W, -.084), on(s * sw * .88 * W, -.07)] : [on(0, -.084), on(s * sw * .2, -.092), on(s * sw * .38, -.095), on(s * sw * .52, -.089)]); } } // W > 1: a wide smile whose corners turn up (Shiba)
   const tongue = add(head, ell(.035, .012, .05, 0, 0, 0), std(0xf07f95, { roughness: .4 }), 0, -.112, mz - .005); tongue.rotation.x = .5; tongue.visible = false; tongue.castShadow = false; // shows when happy (panting)
   // eyes: round and dark, with a dark rim — a dog's soft gaze, no slit pupils
   const eyeTex = canvasTex(256, 256, (c, w) => { const cx = w / 2, R = w * .47; c.fillStyle = spec.eye.iris[3]; c.fillRect(0, 0, w, w);
