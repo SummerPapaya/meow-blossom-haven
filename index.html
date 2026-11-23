@@ -1590,9 +1590,9 @@ BREEDS.dango = { name: { zh: '团子三花', en: 'Dango Calico' }, hidden: true,
 // 好朋狗: dog breeds (dog: anatomy for buildDog)
 const DOGS = {
   labWhite: { name: { zh: '拉布拉多', en: 'Labrador' }, build: 'short', fur: .4, tailR: 1, size: 1.55, eye: 'dogDeep', nose: [0x2a221f, 0x17110f],
-    dog: { cheekS: .76, legK: 1.36, legW: .98, bodyW: 1.12, chestK: 1.34, bodyL: 1.1, headY: .52, headZ: 1.16, headS: 1.16, skullW: 1.02, snout: [.092, .078, .145], flews: true, noseS: .6, eyeS: .8, smile: 1.25, eyeTilt: .14, earS: 1.2, earY: .08,
+    dog: { cheekS: .76, legK: 1.36, legW: .98, bodyW: 1.12, chestK: 1.34, bodyL: 1.1, belly: 1.3, headY: .52, headZ: 1.16, headS: 1.16, skullW: 1.02, snout: [.1, .08, .165], flews: true, noseS: .66, eyeS: .76, eyeW: 1.22, smile: 1.15, mouthY: -.03, eyeTilt: .24, earS: 1.36, earY: .15,
       neck: [.2, .21, .2, -.8, .24, .6], ear: 'tri', tail: 'otter', tailSegs: [.088, .078, .068, .058, .049, .04, .03], tailStep: .115, tailFur: .02,
-      fur: .017, curl: .04, faceFur: .9, legFur: .95, density: 300, thick: 2, shells: 16, eyeX: .09, eyeY: .05, eyeZ: .14, tailPose: { raise: -1.3, curl: -.05 } },
+      fur: .017, curl: .04, faceFur: .9, legFur: .95, density: 300, thick: 2, shells: 16, eyeX: .1, eyeY: .055, eyeZ: .14, tailPose: { raise: -1.3, curl: -.05 } },
     coat: coat(1, 0xf0e2c6, 0xe6d3b0, 0xcfb58e, 0xf6ecd8, { ear: 0xe8d6b6, earInner: 0xe8b7a8, tuft: 0xf3e8d3, tail: [0xf3e8d3, 0xe9dabf], rim: 0x3a2c26, freckle: 0xd8c4a6, whisker: 0xffffff }) },
   shiba: { name: { zh: '柴犬', en: 'Shiba Inu' }, build: 'short', fur: .5, tailR: 1, size: 1, eye: 'dogDark', nose: [0x231a17, 0x140e0c],
     dog: { legK: 1.1, legW: 1, bodyW: .98, chestK: 1, headY: .45, headZ: 1.13, headS: 1.3, bodyL: .88, skullW: 1.1, snout: [.082, .062, .12], noseS: .64, eyeS: .66, eyeTilt: .3, smile: 1.3, cheekS: 1.05, neck: [.16, .17, .18, -.5, .2, .6], ear: 'erect', tail: 'curl', tailSegs: [.074, .078, .076, .07, .062, .05], tailStep: .1, tailFur: .075,
@@ -1771,7 +1771,7 @@ function buildDog(spec, self) {
   const root = new THREE.Group(), pivot = new THREE.Group(); root.add(pivot);
   // torso: chest, waist, rump and neck melted into one body — deep chest, tucked waist, level back
   const NK = D.neck || [.165, .2, .19, -.75, .26, .58];
-  const bodyGeo = smoothBlob([{ e: [.27 * BW, .29 * CK, .3 * BL, 0, -.03, .36 * BL] }, { e: [.24 * BW, .23, .32 * BL, 0, .03, .0] }, { e: [.25 * BW, .26, .27 * BL, 0, .03, -.36 * BL] },
+  const bodyGeo = smoothBlob([{ e: [.22 * BW, .2 * (D.belly ?? 1), .34 * BL, 0, -.07 - .04 * ((D.belly ?? 1) - 1), .1 * BL] }, { e: [.27 * BW, .29 * CK, .3 * BL, 0, -.03, .36 * BL] }, { e: [.24 * BW, .23, .32 * BL, 0, .03, .0] }, { e: [.25 * BW, .26, .27 * BL, 0, .03, -.36 * BL] },
     { e: [NK[0] * BW, NK[1], NK[2], 0, NK[4], NK[5] * BL], rx: NK[3] }, { e: [NK[0] * BW * .85, NK[1] * .8, NK[2] * .85, 0, NK[4] + NK[1] * .55, NK[5] * BL + NK[1] * .5], rx: NK[3] }], [0, .06, .05], .16, { w: 72, h: 48, fur: (x, y) => y < -.12 ? 1.15 : 1 });
   const body = furMesh(bodyGeo, coatO(2, FL)); body.position.z = .38; pivot.add(body);
   // head: cranium, cheeks, brows, stop, muzzle, jaw (and a Labrador's lips) as one skin
@@ -1787,7 +1787,7 @@ function buildDog(spec, self) {
   const dark = std(spec.nose.dark, { roughness: .35, emissive: spec.nose.dark, emissiveIntensity: .12 });
   { const NS = D.noseS ?? 1, n = add(head, ell(sw * .62 * NS, sh * .5 * NS, .035 * NS, 0, 0, 0, 1, 18, 12), new THREE.MeshPhysicalMaterial({ color: spec.nose.pink, roughness: .5, clearcoat: .3, clearcoatRoughness: .45 })); n.position.set(0, -.03 + sh * .25, mz + .02); n.castShadow = false;
     for (const s of [-1, 1]) { const h = add(head, ell(.011 * NS, .007 * NS, .006), dark, s * sw * .28 * NS, -.035 + sh * .2, mz + .02 + .03 * NS); h.rotation.z = s * .6; h.castShadow = false; } // nostrils
-    const tube = pts => add(head, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, .003, 5), dark).castShadow = false, on = (x, y) => new V3(x, y, skinZ(x, y) + FF * (.45 + 3 * Math.abs(x))); // mouth lines drawn on the skin, just proud of the fur
+    const tube = pts => add(head, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, .003, 5), dark).castShadow = false, on = (x, y) => { y += D.mouthY || 0; return new V3(x, y, skinZ(x, y) + FF * (.45 + 3 * Math.abs(x))); }; // mouthY: a lower lip line (Labrador) // mouth lines drawn on the skin, just proud of the fur
     if (D.mouth !== false) { const W = D.smile || 1; tube([on(0, -.06), on(0, -.072), on(0, -.084)]); for (const s of [-1, 1]) tube(W > 1 ? [on(0, -.084), on(s * sw * .28 * W, -.1), on(s * sw * .55 * W, -.097), on(s * sw * .78 * W, -.084), on(s * sw * .88 * W, -.07)] : [on(0, -.084), on(s * sw * .2, -.092), on(s * sw * .38, -.095), on(s * sw * .52, -.089)]); } } // W > 1: a wide smile whose corners turn up (Shiba)
   const tongue = add(head, ell(.035, .012, .05, 0, 0, 0), std(0xf07f95, { roughness: .4 }), 0, -.112, mz - .005); tongue.rotation.x = .5; tongue.visible = false; tongue.castShadow = false; // shows when happy (panting)
   // eyes: round and dark, with a dark rim — a dog's soft gaze, no slit pupils
@@ -1799,7 +1799,7 @@ function buildDog(spec, self) {
     for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { const a = j * (n + 1) + i, b = a + 1, c2 = a + n + 1; idx.push(a, b, c2 + 1, a, c2 + 1, c2); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g; })();
   const eyeMat = new THREE.MeshPhysicalMaterial({ map: eyeTex, roughness: .08, clearcoat: 1, clearcoatRoughness: .03, emissive: 0xffffff, emissiveMap: eyeTex, emissiveIntensity: .14 }), rimMat = std(spec.coat.rim, { roughness: .9 });
-  const eyes = [-1, 1].map(s => { const e = new THREE.Group(); e.position.set(s * D.eyeX, D.eyeY, skinZ(D.eyeX, D.eyeY) + FF * .3); e.rotation.set(-.05, s * .32, s * (D.eyeTilt ?? 0)); e.scale.setScalar(D.eyeS ?? 1); e.userData.s = D.eyeS ?? 1; head.add(e);
+  const eyes = [-1, 1].map(s => { const e = new THREE.Group(); e.position.set(s * D.eyeX, D.eyeY, skinZ(D.eyeX, D.eyeY) + FF * .3); e.rotation.set(-.05, s * .32, s * (D.eyeTilt ?? 0)); e.scale.setScalar(D.eyeS ?? 1); e.scale.x *= D.eyeW ?? 1; e.userData.s = D.eyeS ?? 1; head.add(e); // eyeW > 1: almond eyes
     e.add(new THREE.Mesh(eyeGeo, eyeMat)); const r = new THREE.Mesh(eyeGeo, rimMat); r.scale.set(1.16, 1.16, .5); r.position.z = -.004; e.add(r); return e; });
   // ears
   const earC = spec.coat.ear, ears = [-1, 1].map(s => { const e = new THREE.Group(); head.add(e);
@@ -1854,17 +1854,17 @@ function buildDog(spec, self) {
     const z = .38 + (z0 - .38) * BL, L = new THREE.Group(); L.position.set(x, y, z); pivot.add(L);
     const U = new THREE.Group(), Kn = new THREE.Group(); L.add(U); U.add(Kn); let F = null; const sx = -Math.sign(x), W = LW;
     if (hind) {
-      const kY = -.27 * LK, hY = kY - .25 * LK, fY = hY - .16 * LK; Kn.position.y = kY; F = new THREE.Group(); F.position.y = hY - kY; Kn.add(F);
-      skinTube([[.2, sx * .02, -.01, .1 * W, .11], [.06, sx * .035, .0, .15 * W, .19], [-.08 * LK, sx * .03, .02, .135 * W, .165], [kY + .04, .0, .01, .09 * W, .1], [kY - .08 * LK, 0, -.01, .074 * W, .078],
+      const kY = -.3 * LK, hY = kY - .29 * LK, fY = hY - .17 * LK; Kn.position.y = kY; F = new THREE.Group(); F.position.y = hY - kY; Kn.add(F);
+      skinTube([[.28, sx * .02, -.01, .12 * W, .13], [.08, sx * .035, .0, .16 * W, .2], [-.08 * LK, sx * .03, .02, .135 * W, .165], [kY + .04, .0, .01, .09 * W, .1], [kY - .08 * LK, 0, -.01, .074 * W, .078],
         [hY + .02, 0, -.02, .066 * W, .07], [hY - .07 * LK, 0, .0, .062 * W, .064], [fY + .02, 0, .03, .075 * W, .1], [fY - .03, 0, .05, .09 * W, .125], [fY - .065, 0, .055, .07 * W, .1]],
         'y', [U, Kn, F], [0, kY, hY], .07, L, legMat());
     } else {
       const kY = -.3 * LK, fY = kY - .29 * LK; Kn.position.y = kY;
-      skinTube([[.18, sx * .015, -.01, .09 * W, .1], [.04, sx * .025, .0, .12 * W, .14], [-.12 * LK, sx * .01, .0, .094 * W, .108], [kY + .03, 0, -.005, .08 * W, .088], [kY - .1 * LK, 0, 0, .074 * W, .076],
+      skinTube([[.26, sx * .015, -.01, .11 * W, .12], [.05, sx * .025, .0, .13 * W, .15], [-.12 * LK, sx * .01, .0, .094 * W, .108], [kY + .03, 0, -.005, .08 * W, .088], [kY - .1 * LK, 0, 0, .074 * W, .076],
         [fY + .06, 0, .0, .066 * W, .068], [fY + .02, 0, .03, .076 * W, .1], [fY - .03, 0, .05, .092 * W, .125], [fY - .065, 0, .055, .07 * W, .1]],
         'y', [U, Kn], [0, kY], .07, L, legMat());
     }
-    L.userData = { j: new V3(x, y, z), ph, hind, U, K: Kn, F, r0: hind ? -.16 : .1, r1: hind ? .42 : -.22, r2: -.26 };
+    L.userData = { j: new V3(x, y, z), ph, hind, U, K: Kn, F, r0: hind ? -.34 : .1, r1: hind ? .78 : -.22, r2: hind ? -.44 : -.26 }; // hind: thigh forward, hock pushed back, metatarsus upright
     return L; });
   // tail: one tube along the vertebrae
   const tailBase = new THREE.Group(); tailBase.position.set(0, .2, .38 - .58 * BL); pivot.add(tailBase);
