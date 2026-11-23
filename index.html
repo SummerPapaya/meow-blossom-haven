@@ -2583,15 +2583,25 @@ function updateWho() { // "playing with …" line above the buttons, only when t
   let w = $('#who'); if (!w) { w = document.createElement('div'); w.id = 'who'; $('#actions').prepend(w); }
   w.hidden = !key; if (key) w.textContent = tr({ zh: `🐾 正在陪伴：${catName(selected)} · 点小猫可切换`, en: `🐾 With ${catName(selected)} · tap a cat to switch` }); }
 function framedShot(c) { // render the cat from the clearest 3/4 angle and return the canvas (call synchronously, before the next frame)
-  const s = c.spec.size || 1, base = c.root.position.clone(), f = fwdOf(c), look = base.clone().add(new V3(0, .62 * s, 0)).addScaledVector(f, .3 * s);
-  const list = []; ISL[env.island].traverse(o => { if (o.isMesh && !o.isInstancedMesh && o.visible && o.material && !Array.isArray(o.material) && o.material.visible !== false && o.material.colorWrite !== false && !o.material.transparent) list.push(o); });
-  const ray = new THREE.Raycaster(); let best = null, first = null;
+  const s = c.spec.size || 1, base = c.root.position.clone(), f = fwdOf(c);
+  // frame the pet by its real extent (a big dog, a curled-up kitten…): the visible meshes' bounds give the centre and how far back to stand
+  const box = new THREE.Box3(), tb = new THREE.Box3(); c.root.updateMatrixWorld(true);
+  c.root.traverse(o => { if (o.isMesh && o.material && o.material !== invisible && o.material !== shadowOnly && o.material.visible !== false) { o.geometry.computeBoundingBox(); tb.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld); box.union(tb); } });
+  const look = box.isEmpty() ? base.clone().add(new V3(0, .62 * s, 0)).addScaledVector(f, .3 * s) : box.getCenter(new V3()), rad = box.isEmpty() ? s : box.getSize(new V3()).length() * .5;
+  const fitD = Math.max(2.2, rad / Math.tan(THREE.MathUtils.degToRad(11.5)) * .92); // the 4:5 card shows ~23° across at fov 30
+  const list = [], sph = new THREE.Sphere(); // anything that could stand between the lens and the pet: solid and see-through scenery, fluffy things (via their shadow stand-ins) and the other pets
+  const take = o => { if (!o.isMesh || (o.isInstancedMesh && o.count > 40) || !o.geometry || !o.material || Array.isArray(o.material) || o.material === invisible) return; let v = o; while (v) { if (!v.visible) return; v = v.parent; }
+    if (o.material !== shadowOnly && (o.material.visible === false || o.material.colorWrite === false)) return; if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); sph.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld); if (sph.radius > 7) return; list.push(o); };
+  const own = new Set(); c.root.traverse(o => own.add(o)); own.add(c.blob); scene.traverse(o => { if (!own.has(o) && o !== mark) take(o); });
+  const ray = new THREE.Raycaster(); let best = null, first = null, fewest = 99;
   const perched = c.loc !== 'floor', lift = perched ? .22 : 0; // on a perch or in a bed: look down a little more so the platform doesn't cover her
-  for (const [a, up] of [[.55, .4], [-.55, .4], [.9, .45], [-.9, .45], [.2, .38], [1.3, .5], [-1.3, .5], [0, .7]]) {
-    const dir = f.clone().applyAxisAngle(new V3(0, 1, 0), a); dir.y = up + lift; dir.normalize(); const dist = 4.3 * s, pos = look.clone().addScaledVector(dir, dist); if (!first) first = pos;
+  for (const [a, up] of [[.55, .4], [-.55, .4], [.9, .45], [-.9, .45], [.2, .38], [1.3, .5], [-1.3, .5], [.55, .75], [-.55, .75], [1.8, .55], [-1.8, .55], [0, .7], [PI, .6], [0, 1.1]]) {
+    const dir = f.clone().applyAxisAngle(new V3(0, 1, 0), a); dir.y = up + lift; dir.normalize(); const dist = fitD, pos = look.clone().addScaledVector(dir, dist); if (!first) first = pos;
     if (Math.hypot(pos.x, pos.z) > IR + 4) continue;
-    const clear = [look, c.head.getWorldPosition(new V3()), base.clone().add(new V3(0, .25 * s, 0))].every(t => { const v = pos.clone().sub(t), L = v.length(); v.multiplyScalar(1 / L); ray.set(t.clone().addScaledVector(v, .55 * s), v); ray.far = L - .55 * s; return !ray.intersectObjects(list, false).length; });
-    if (clear) { best = pos; break; } // head, body and paws all in plain view
+    const tg = [look, c.head.getWorldPosition(new V3()), base.clone().add(new V3(0, .25 * s, 0)), box.isEmpty() ? look : new V3(box.min.x, look.y, box.min.z), box.isEmpty() ? look : new V3(box.max.x, look.y, box.max.z)];
+    const hits = tg.filter(t => { const v = pos.clone().sub(t), L = v.length(); v.multiplyScalar(1 / L); ray.set(t.clone().addScaledVector(v, rad * .6), v); ray.far = L - rad * .6; return ray.intersectObjects(list, false).length; }).length;
+    if (!hits) { best = pos; break; } // head, body, paws and both ends in plain view
+    if (hits < fewest) { fewest = hits; first = pos; } // otherwise the least-hidden view
   }
   const p0 = camera.position.clone(), q0 = camera.quaternion.clone(), f0 = camera.fov; camera.position.copy(best || first); camera.lookAt(look); camera.fov = 30; camera.updateProjectionMatrix();
   const mv = mark.visible; mark.visible = false; composer.render(); mark.visible = mv; const src = renderer.domElement, out = document.createElement('canvas'), H = src.height, W = Math.min(src.width, Math.round(H * .8));
