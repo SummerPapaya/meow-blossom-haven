@@ -1608,12 +1608,12 @@ const DOGS = {
       fur: .045, curl: .22, faceFur: .38, legFur: .55, density: 230, thick: 2.3, shells: 22, eyeX: .1, eyeY: .055, eyeZ: .14, tailPose: { raise: -1.15, curl: -.04, walkUp: .65, tipUp: .18 } },
     coat: coat(1, 0xe6b877, 0xdaa866, 0xc08e52, 0xf2d4a2, { ear: 0xd9a35f, earInner: 0xe8b47a, tuft: 0xf2d4a2, tail: [0xebc285, 0xf3d7a8], rim: 0x2e1f16, freckle: 0xdca25a, whisker: 0xffffff }) },
   samoyed: { name: { zh: '萨摩耶', en: 'Samoyed' }, build: 'long', fur: 1, tailR: 1, size: 1.35, eye: 'dogDeep', nose: [0x1e1a1a, 0x100c0c],
-    dog: { legK: 1.12, legW: 1.05, bodyW: 1.06, chestK: 1.15, headY: .5, headZ: 1.14, headS: 1.3, bodyL: .94, skullW: 1.12, snout: [.084, .064, .12], noseS: .62, eyeS: .66, eyeW: 1.15, eyeTilt: .26, smile: 1.6, cheekS: 1.1,
+    dog: { legK: 1.12, legW: 1.05, bodyW: 1.06, chestK: 1.15, headY: .5, headZ: 1.14, headS: 1.3, bodyL: .94, skullW: 1.12, snout: [.066, .056, .17], noseS: .58, eyeS: .66, ruff: 1.2, eyeW: 1.15, eyeTilt: .26, smile: 1.3, cheekS: 1.1,
       neck: [.19, .2, .2, -.55, .22, .6], ear: 'erect', earS: 1.05, earX: .125, earSpread: .3, earFur: .06, tail: 'curl', tailSegs: [.07, .075, .074, .068, .06, .05], tailStep: .1, tailFur: .2,
-      fur: .15, curl: .32, faceFur: .5, legFur: .55, density: 150, thick: 2.8, shells: 30, eyeX: .09, eyeY: .045, eyeZ: .142, tailPose: { raise: 1.3, curl: .6 } },
+      fur: .2, curl: .38, faceFur: .45, legFur: .6, muzzleFur: .25, density: 140, thick: 2.9, shells: 34, eyeX: .09, eyeY: .045, eyeZ: .142, tailPose: { raise: 1.3, curl: .6 } },
     coat: coat(1, 0xfaf7f1, 0xf0ece4, 0xe6e0d6, 0xfdfbf7, { ear: 0xf6f2ea, earInner: 0xf0d6d0, tuft: 0xfaf7f1, tail: [0xfaf7f1, 0xf2eee6], rim: 0x1a1414, freckle: 0xfaf7f1, whisker: 0xffffff }) },
   bichon: { name: { zh: '比熊', en: 'Bichon Frisé' }, build: 'long', fur: 1, tailR: 1, size: .6, eye: 'dogDeep', nose: [0x1c1616, 0x100c0c],
-    dog: { legK: 1.02, legW: 1.25, bodyW: 1.05, chestK: .95, headY: .5, headZ: 1.1, headS: 1.55, skullW: 1.18, snout: [.08, .07, .075], noseS: .62, eyeS: 1.0, cheekS: 1.2, mouth: false, rimS: 1.32, earS: 1.1, neck: [.15, .16, .17, -.55, .2, .6], ear: 'pendant', tail: 'pom', tailSegs: [.045, .042], tailStep: .09, tailFur: .1,
+    dog: { legK: 1.02, legW: 1.25, bodyW: 1.05, chestK: .95, headY: .5, headZ: 1.1, headS: 1.55, skullW: 1.18, snout: [.09, .08, .13], noseS: .46, eyeS: .7, cheekS: 1.2, mouth: false, rimS: 1.28, muzzleFur: .6, earS: 1.1, neck: [.15, .16, .17, -.55, .2, .6], ear: 'pendant', tail: 'pom', tailSegs: [.045, .042], tailStep: .09, tailFur: .1,
       fur: .09, curl: .25, coil: 1.8, faceFur: 1.05, legFur: .95, density: 120, thick: 3.6, shells: 34, eyeX: .09, eyeY: .05, eyeZ: .15, tailPose: { raise: 1.7, curl: .3 } },
     coat: coat(1, 0xfbf8f2, 0xf1ece2, 0xe6dfd2, 0xfdfbf8, { ear: 0xf8f4ec, earInner: 0xf8f4ec, tuft: 0xfbf8f2, tail: [0xfbf8f2, 0xf3eee4], rim: 0x0a0606, freckle: 0xfbf8f2, whisker: 0xffffff }) },
 };
@@ -1794,14 +1794,15 @@ function buildDog(spec, self) {
   const hp = [{ e: [.2 * D.skullW, .185, .19, 0, .03, -.03] }, ...[-1, 1].map(q => ({ e: [.13 * D.skullW * CS, .11 * CS, .12, q * .085, -.045, .04] })), ...[-1, 1].map(q => ({ e: [.045, .028, .045, q * .075, .1, .1] })),
     { e: [sw * .8, sh * .75, sl * .75, 0, -.015, .1 + sl * .45] }, { e: [sw, sh, sl * .72, 0, -.06, .12 + sl * .52] }, { e: [sw * .78, sh * .55, sl * .6, 0, -.115, .1 + sl * .45] }];
   if (D.flews) for (const q of [-1, 1]) hp.push({ e: [sw * .48, sh * .62, sl * .45, q * sw * .5, -.1, .13 + sl * .62] }); // a Labrador's soft lips
-  const hg = smoothBlob(hp, [0, -.02, .05], .09, { w: 72, h: 52, reach: 1 }), hsdf = hg.userData.sdf, FF = FL * (D.faceFur ?? .8);
+  // short fur on the muzzle (muzzleFur), and the mouth line sits on the skin just out through it (see on())
+  const hg = smoothBlob(hp, [0, -.02, .05], .09, { w: 72, h: 52, reach: 1, fur: (x, y, z) => 1 - (1 - (D.muzzleFur ?? .35)) * clamp((z - (.04 + sl * .2)) / .06, 0, 1) * clamp((.03 - y) / .05, 0, 1) }), hsdf = hg.userData.sdf, FF = FL * (D.faceFur ?? .8);
   head.add(furMesh(hg, coatO(1, FF, { comb: new V3(0, -.2, -.5) })));
   const skinZ = (x, y) => { let z = .7; while (z > -.2 && hsdf(x, y, z) > 0) z -= .004; return z; }; // front of the skin at (x, y)
-  mz = skinZ(0, -.03 + sh * .25) - .02 + FF * .35; // the nose sits on the muzzle tip, just proud of the fur
+  mz = skinZ(0, -.03 + sh * .25) - .02 + FF * (D.muzzleFur ?? .35) * .5; // the nose sits on the muzzle tip, just proud of the fur
   const dark = std(spec.nose.dark, { roughness: .35, emissive: spec.nose.dark, emissiveIntensity: .12 });
   { const NS = D.noseS ?? 1, n = add(head, ell(sw * .62 * NS, sh * .5 * NS, .035 * NS, 0, 0, 0, 1, 18, 12), new THREE.MeshPhysicalMaterial({ color: spec.nose.pink, roughness: .5, clearcoat: .3, clearcoatRoughness: .45 })); n.position.set(0, -.03 + sh * .25, mz + .02); n.castShadow = false;
     for (const s of [-1, 1]) { const h = add(head, ell(.011 * NS, .007 * NS, .006), dark, s * sw * .28 * NS, -.035 + sh * .2, mz + .02 + .03 * NS); h.rotation.z = s * .6; h.castShadow = false; } // nostrils
-    const tube = pts => add(head, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, .003, 5), dark).castShadow = false, on = (x, y, raw) => { if (!raw) y += D.mouthY || 0; return new V3(x, y, skinZ(x, y) + FF * (.45 + 3 * Math.abs(x))); }, noseBot = -.03 + sh * .25 - sh * .5 * (D.noseS ?? 1) * .9; // the mouth's centre line starts at the bottom of the nose // mouthY: a lower lip line (Labrador) // mouth lines drawn on the skin, just proud of the fur
+    const tube = pts => add(head, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, .003, 5), dark).castShadow = false, on = (x, y, raw) => { if (!raw) y += D.mouthY || 0; const z = skinZ(x, y), e = .003; let nx = hsdf(x + e, y, z) - hsdf(x - e, y, z), ny = hsdf(x, y + e, z) - hsdf(x, y - e, z), nz = hsdf(x, y, z + e) - hsdf(x, y, z - e); const L = Math.hypot(nx, ny, nz) || 1, o = FF * (D.muzzleFur ?? .35) * .6 + .004; return new V3(x + nx / L * o, y + ny / L * o, z + nz / L * o); }, noseBot = -.03 + sh * .25 - sh * .5 * (D.noseS ?? 1) * .9; // the mouth's centre line starts at the bottom of the nose // mouthY: a lower lip line (Labrador) // mouth lines drawn on the skin, just proud of the fur
     if (D.mouth !== false) { const W = D.smile || 1; { const m = -.084 + (D.mouthY || 0); tube([on(0, noseBot, 1), on(0, (noseBot + m) / 2, 1), on(0, m, 1)]); } for (const s of [-1, 1]) tube(W > 1 ? [on(0, -.084), on(s * sw * .28 * W, -.1), on(s * sw * .55 * W, -.097), on(s * sw * .78 * W, -.084), on(s * sw * .88 * W, -.07)] : [on(0, -.084), on(s * sw * .2, -.092), on(s * sw * .38, -.095), on(s * sw * .52, -.089)]); } } // W > 1: a wide smile whose corners turn up (Shiba)
   const tongue = add(head, ell(.035, .012, .05, 0, 0, 0), std(0xf07f95, { roughness: .4 }), 0, -.112, mz - .005); tongue.rotation.x = .5; tongue.visible = false; tongue.castShadow = false; // shows when happy (panting)
   // eyes: round and dark, with a dark rim — a dog's soft gaze, no slit pupils
@@ -1878,7 +1879,7 @@ function buildDog(spec, self) {
         [fY + .06, 0, .0, .066 * W, .068], [fY + .02, 0, .03, .076 * W, .1], [fY - .03, 0, .05, .092 * W, .125], [fY - .065, 0, .055, .07 * W, .1]],
         'y', [U, Kn], [0, kY], .07, L, legMat());
     }
-    L.userData = { j: new V3(x, y, z), ph, hind, U, K: Kn, F, r0: hind ? -.16 : .1, r1: hind ? .52 : -.22, r2: hind ? -.36 : -.26 }; // hind: thigh forward, hock pushed back, metatarsus upright
+    L.userData = { j: new V3(x, y, z), ph, hind, U, K: Kn, F, r0: hind ? -.06 : .1, r1: hind ? .6 : -.22, r2: hind ? -.54 : -.26 }; // hind: thigh forward, hock pushed back, metatarsus upright
     return L; });
   // tail: one tube along the vertebrae
   const tailBase = new THREE.Group(); tailBase.position.set(0, .2, .38 - .58 * BL); pivot.add(tailBase);
